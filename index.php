@@ -38,18 +38,16 @@ add_filter('learndash_template','alt_ipe_replacement_learndash_templates', 90, 5
 
 
 function alt_ipe_get_group_members(){
-	$user_id = get_current_user_id();
-	$user = get_user_meta($user_id,'');	
-	foreach($user as $key=>$value){
+	$user_id = get_current_user_id();//get logged in user
+	$user = get_user_meta($user_id,'');	//get user ID
+	foreach($user as $key=>$value){//cycle through metadata looking for learndash partial match
 	  if("learndash_group_users_" == substr($key,0,22)){ //such a mess to do partial match
-	   		var_dump($value);
-	   		$users = alt_ipd_get_group_users($value[0]);
-	   		 alt_ipd_users_to_ids($users);
+	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
+	   		return alt_ipd_users_to_ids($users);//get their IDs
 		  }
 		}		
 			
 	}
-
 
 
 //GET GRP ID FROM LEARN DASH GROUPS
@@ -58,6 +56,7 @@ function alt_ipe_get_group_members(){
 //GET THE SCORES FROM QUIZ
 //RESTRICT BY PPL IN GROUP
 
+//get other learndash group members by metadata field
 function alt_ipd_get_group_users($group_id){
 	$args = array(
 	'meta_key'     => 'learndash_group_users_' . $group_id,
@@ -68,8 +67,29 @@ function alt_ipd_get_group_users($group_id){
 	return $the_group;
 }
 
+//get the user IDs for the group members in an array
 function alt_ipd_users_to_ids($users){
+	$user_ids = [];
 	foreach ($users as $user) {
-		var_dump($user->ID);
+		array_push($user_ids, $user->ID);
 	}
+	return $user_ids;
 }
+
+
+//TEMPLATE PIECES
+
+function alt_ipd_get_stat_refs($quiz_id, $user_ids){
+	return 'q id = ' . $quiz_id . ' user ids = ' . implode(', ',$user_ids);
+}
+
+
+//add_filter( 'posts_join', 'alt_ipd_join_stats_tables_join' );
+function alt_ipd_join_stats_tables_join(){
+	global $wpdb;
+	$results = $wpdb->get_results( " SELECT statistic_ref_id, quiz_id, user_id FROM wp_wp_pro_quiz_statistic_ref WHERE user_id IN (1,7,9,38)");
+	var_dump($results);
+}
+
+
+

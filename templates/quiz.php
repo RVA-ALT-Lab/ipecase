@@ -33,8 +33,14 @@
  * 
  * @package LearnDash\Quiz
  */
+alt_ipd_join_stats_tables_join();
+var_dump($quiz_settings['quiz_pro']);
+//var_dump(alt_ipe_get_group_members());
+//var_dump($quiz_settings['quiz_pro']); //get quiz id as used in wp_wp_pro_quiz_statistic_ref will need user_id & quiz_id to get statistic_ref_id
+echo alt_ipd_get_stat_refs($quiz_settings['quiz_pro'], alt_ipe_get_group_members());
 
-var_dump(alt_ipe_get_group_members());
+
+
 echo '<h2>ALL YOUR TEMPLATE BELONG TO US!!!</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
