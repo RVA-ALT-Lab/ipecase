@@ -48,7 +48,7 @@ function alt_ipe_get_group_members(){
 		}		
 			
 	}
-
+//alt_ipd_get_stat_refs($quiz_settings['quiz_pro'], alt_ipe_get_group_members())
 
 //GET GRP ID FROM LEARN DASH GROUPS
 //GET THE PPL IN THAT GRP
@@ -80,16 +80,66 @@ function alt_ipd_users_to_ids($users){
 //TEMPLATE PIECES
 
 function alt_ipd_get_stat_refs($quiz_id, $user_ids){
-	return 'q id = ' . $quiz_id . ' user ids = ' . implode(', ',$user_ids);
+	return implode(', ',$user_ids);
 }
 
 
 //add_filter( 'posts_join', 'alt_ipd_join_stats_tables_join' );
-function alt_ipd_join_stats_tables_join(){
+function alt_ipd_join_stats_tables_join($user_ids){
+	//$ids = implode(', ',$user_ids);
 	global $wpdb;
-	$results = $wpdb->get_results( " SELECT statistic_ref_id, quiz_id, user_id FROM wp_wp_pro_quiz_statistic_ref WHERE user_id IN (1,7,9,38)");
+	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id FROM wp_wp_pro_quiz_statistic_ref WHERE user_id IN (".$user_ids .")");
 	var_dump($results);
 }
 
 
+function test_it(){
+	global $wpdb;
+
+$sql = "SELECT statistic_ref_id, quiz_id, user_id FROM {$wpdb->prefix}wp_wp_pro_quiz_statistic_ref JOIN {$wpdb->prefix}wp_wp_pro_quiz_statistic_ref WHERE (statistic_ref_id = statistic_ref_id)";
+
+$results = $wpdb->get_results( $sql );
+}
+
+
+
+//BADDDDDDD
+
+
+add_action( 'gform_after_submission_5', 'gform_site_cloner', 10, 2 );
+
+function gform_site_cloner($entry, $form){
+		/**
+	 * Before doing anything: setup clone $_POST data.
+	 * [] {
+	 *     @type  string  'action'         => 'process',
+	 *     @type  string  'clone_mode'     => 'core',
+	 *     @type  int     'source_id'      => $blog_id,
+	 *     @type  string  'target_name'    => $target_name,
+	 *     @type  string  'target_title'   => $target_title,
+	 *     @type  bool    'disable_addons' => true,
+	 *     @type  string  'clone_nonce'    => wp_create_nonce('ns_cloner')
+	 * }
+	 */
+
+    $_POST =  [
+	      'action'         => 'process',
+	      'clone_mode'     => 'core',
+	      'source_id'      => rgar( $entry, '3' ) ,
+	      'target_name'    => rgar( $entry, '2' ) ,
+	      'target_title'   => rgar( $entry, '2' ) ,
+	      'disable_addons' => true,
+	      'clone_nonce'    => wp_create_nonce('ns_cloner')
+	  ];
+	
+	// Setup clone process and run it.
+	$ns_site_cloner = new ns_cloner();
+	$ns_site_cloner->process();
+
+	$site_id = $ns_site_cloner->target_id;
+	$site_info = get_blog_details( $site_id );
+	if ( $site_info ) {
+		// Clone successful!
+	}
+}
 
