@@ -87,14 +87,13 @@ function alt_ipd_get_stat_refs($quiz_id, $user_ids){
 //add_filter( 'posts_join', 'alt_ipd_join_stats_tables_join' );
 function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	global $wpdb;
-	$user_ids = '1,28,5';
-	$results = $wpdb->get_results( "SELECT * 
+	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id 
 									FROM wp_wp_pro_quiz_statistic_ref 
-									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" . $user_ids . "))");
+									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (1,28))");
 	var_dump($results);
 }
 
-
+//SELECT `statistic_ref_id`, `quiz_id`, `user_id` FROM `wp_wp_pro_quiz_statistic_ref` WHERE (`quiz_id` = 14 AND `user_id` IN (1,28))
 
 
 
