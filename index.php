@@ -94,13 +94,12 @@ function alt_ipd_users_to_ids($users){
 function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	$quiz_id = (int)$quiz_id;
 	global $wpdb;
-	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id 
+	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.answer_data
 									FROM wp_wp_pro_quiz_statistic_ref 
-									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" . $user_ids . "))");
+									INNER JOIN wp_wp_pro_quiz_statistic
+									ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id
+									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" . $user_ids . "))							
+									");
 	var_dump($results);
 }
-
-//SELECT `statistic_ref_id`, `quiz_id`, `user_id` FROM `wp_wp_pro_quiz_statistic_ref` WHERE (`quiz_id` = 14 AND `user_id` IN (1,28))
-
-
 
