@@ -47,11 +47,11 @@ echo $user_ids;
 echo '<h3>stat_refs</h3>';
 //echo alt_ipd_get_stat_refs($quiz_id, alt_ipe_get_group_members());
 
-alt_ipd_join_stats_tables_join($group_members, $quiz_id);
+alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
 
 
 
-echo '<h2>Greet19</h2>';
+echo '<h2>Greet20</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );
