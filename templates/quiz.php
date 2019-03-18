@@ -41,7 +41,8 @@ $group_members = alt_ipe_get_group_members();
 // var_dump('members: ');
 print_r($group_members);
 // var_dump('quiz id: ' . $quiz_settings['quiz_pro']); //get quiz id as used in wp_wp_pro_quiz_statistic_ref will need user_id & quiz_id to get statistic_ref_id
-
+$user_ids = implode(', ', $group_members);
+echo $user_ids;
 
 echo '<h3>stat_refs</h3>';
 //echo alt_ipd_get_stat_refs($quiz_id, alt_ipe_get_group_members());
