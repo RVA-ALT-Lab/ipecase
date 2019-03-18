@@ -50,7 +50,7 @@ alt_ipd_join_stats_tables_join($group_members, $quiz_id);
 
 
 
-echo '<h2>Greet13</h2>';
+echo '<h2>Greet14</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );
