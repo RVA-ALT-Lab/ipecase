@@ -14,6 +14,7 @@ Text Domain: my-toolset
 */
 defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
+//STUPID LEARNDASH DIRECTORY IS sfwd-lms
 
 add_action('wp_enqueue_scripts', 'alt_ipe_load_scripts');
 
@@ -95,39 +96,30 @@ function alt_ipd_join_stats_tables_join($user_ids){
 
 function test_it(){
 	global $wpdb;
+	$sql = "SELECT * FROM wp_wp_pro_quiz_statistic";
+//$ref_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT statistic_ref_id FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic_ref WHERE  user_id = %d ', $user->ID ) );
 
-$sql = "SELECT statistic_ref_id, quiz_id, user_id FROM {$wpdb->prefix}wp_wp_pro_quiz_statistic_ref JOIN {$wpdb->prefix}wp_wp_pro_quiz_statistic_ref WHERE (statistic_ref_id = statistic_ref_id)";
 
-$results = $wpdb->get_results( $sql );
+	$results = $wpdb->get_results( $sql );
 }
+
+
 
 
 
 //BADDDDDDD
 
 
-add_action( 'gform_after_submission_5', 'gform_site_cloner', 10, 2 );
+add_action( 'gform_after_submission_5', 'gform_site_cloner', 10, 2 );//specific to the gravity form id
 
 function gform_site_cloner($entry, $form){
-		/**
-	 * Before doing anything: setup clone $_POST data.
-	 * [] {
-	 *     @type  string  'action'         => 'process',
-	 *     @type  string  'clone_mode'     => 'core',
-	 *     @type  int     'source_id'      => $blog_id,
-	 *     @type  string  'target_name'    => $target_name,
-	 *     @type  string  'target_title'   => $target_title,
-	 *     @type  bool    'disable_addons' => true,
-	 *     @type  string  'clone_nonce'    => wp_create_nonce('ns_cloner')
-	 * }
-	 */
 
     $_POST =  [
 	      'action'         => 'process',
 	      'clone_mode'     => 'core',
-	      'source_id'      => rgar( $entry, '3' ) ,
-	      'target_name'    => rgar( $entry, '2' ) ,
-	      'target_title'   => rgar( $entry, '2' ) ,
+	      'source_id'      => rgar( $entry, '3' ), //specific to the form entry fields and should resolve to the ID site to copy
+	      'target_name'    => rgar( $entry, '2' ), //specific to the form entry fields
+	      'target_title'   => rgar( $entry, '2' ), //specific to the form entry fields
 	      'disable_addons' => true,
 	      'clone_nonce'    => wp_create_nonce('ns_cloner')
 	  ];
