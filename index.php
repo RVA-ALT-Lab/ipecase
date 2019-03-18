@@ -46,7 +46,9 @@ function alt_ipe_get_group_members(){
 	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
 		  }
 		}		
-	return alt_ipd_users_to_ids($users);//get their IDs	
+	$user_ids = alt_ipd_users_to_ids($users);//get their IDs	
+	$user_ids_string = implode(',' $user_ids);
+	return $user_ids_string;
 	}
 //alt_ipd_get_stat_refs($quiz_settings['quiz_pro'], alt_ipe_get_group_members())
 
@@ -90,7 +92,7 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	global $wpdb;
 	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id 
 									FROM wp_wp_pro_quiz_statistic_ref 
-									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (1,28))");
+									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" . $user_ids . "))");
 	var_dump($results);
 }
 
