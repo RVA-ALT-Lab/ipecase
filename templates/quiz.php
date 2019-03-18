@@ -35,6 +35,7 @@
  */
 
 $quiz_id = $quiz_settings['quiz_pro'];
+var_dump($quiz_id);
 $group_members = alt_ipe_get_group_members();
 $stat_refs = alt_ipd_get_stat_refs($quiz_id, $group_members);
 alt_ipd_join_stats_tables_join($stat_refs, $quiz_id);
@@ -45,7 +46,7 @@ alt_ipd_join_stats_tables_join($stat_refs, $quiz_id);
 echo alt_ipd_get_stat_refs($quiz_id, alt_ipe_get_group_members());
 
 
-echo '<h2>Greetings?</h2>';
+echo '<h2>Greetings.</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );
