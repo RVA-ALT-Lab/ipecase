@@ -96,8 +96,7 @@ function alt_ipd_join_stats_tables_join($user_ids){
 
 function test_it(){
 	global $wpdb;
-	$sql = 'SELECT * FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic';
-//$ref_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT statistic_ref_id FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic_ref WHERE  user_id = %d ', $user->ID ) );
+    $ref_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT statistic_ref_id FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic_ref WHERE  user_id = %d ', $user->ID ) );
 
 
 	$results = $wpdb->get_results( $sql );
