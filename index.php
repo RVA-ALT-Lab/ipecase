@@ -86,20 +86,11 @@ function alt_ipd_get_stat_refs($quiz_id, $user_ids){
 
 
 //add_filter( 'posts_join', 'alt_ipd_join_stats_tables_join' );
-function alt_ipd_join_stats_tables_join($user_ids){
+function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	//$ids = implode(', ',$user_ids);
 	global $wpdb;
-	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id FROM wp_wp_pro_quiz_statistic_ref WHERE user_id IN (" . $user_ids . ")");
+	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id FROM wp_wp_pro_quiz_statistic_ref WHERE user_id IN (" . $user_ids . ") AND quiz_id = " . $quiz_id);
 	var_dump($results);
-}
-
-
-function test_it(){
-	global $wpdb;
-    $ref_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT statistic_ref_id FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic_ref WHERE  user_id = %d ', $user->ID ) );
-
-
-	$results = $wpdb->get_results( $sql );
 }
 
 
