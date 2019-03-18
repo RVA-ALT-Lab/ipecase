@@ -38,13 +38,14 @@ $quiz_id = $quiz_settings['quiz_pro'];
 $group_members = alt_ipe_get_group_members();
 $stat_refs = alt_ipd_get_stat_refs($quiz_id, $group_members);
 alt_ipd_join_stats_tables_join($stat_refs, $quiz_id);
-var_dump('members: ' . alt_ipe_get_group_members());
+var_dump('members: ');
+var_dump(alt_ipe_get_group_members());
 var_dump('quiz id: ' . $quiz_settings['quiz_pro']); //get quiz id as used in wp_wp_pro_quiz_statistic_ref will need user_id & quiz_id to get statistic_ref_id
 
 echo alt_ipd_get_stat_refs($quiz_id, alt_ipe_get_group_members());
 
 
-echo '<h2>Greetings.</h2>';
+echo '<h2>Greetings...</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );
