@@ -27,6 +27,12 @@ function alt_ipe_load_scripts() {
 }
  
 
+/*
+**
+TEMPLATE OVERRIDE
+**
+*/
+
 //from https://webextent.net/override-learndash-templates/
 function alt_ipe_replacement_learndash_templates( $filepath, $name, $args, $echo, $return_file_path){
  if ( 'quiz' == $name ){
@@ -38,6 +44,14 @@ function alt_ipe_replacement_learndash_templates( $filepath, $name, $args, $echo
 add_filter('learndash_template','alt_ipe_replacement_learndash_templates', 90, 5);
 
 
+/*
+**
+GET GROUP QUIZ RESULTS
+**
+*/
+
+
+//GET GRP ID FROM LEARN DASH GROUPS which is in the metadata for the logged in user
 function alt_ipe_get_group_members(){
 	$user_id = get_current_user_id();//get logged in user
 	$user = get_user_meta($user_id,'');	//get user ID
@@ -46,11 +60,10 @@ function alt_ipe_get_group_members(){
 	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
 		  }
 		}		
-	return alt_ipd_users_to_ids($users);//get their IDs	
+	return alt_ipd_users_to_ids($users);//get user ids with matching groups
 	}
 //alt_ipd_get_stat_refs($quiz_settings['quiz_pro'], alt_ipe_get_group_members())
 
-//GET GRP ID FROM LEARN DASH GROUPS
 //GET THE PPL IN THAT GRP
 //GET THE QUIZ ID
 //GET THE SCORES FROM QUIZ
@@ -77,20 +90,13 @@ function alt_ipd_users_to_ids($users){
 }
 
 
-//TEMPLATE PIECES
-
-function alt_ipd_get_stat_refs($quiz_id, $user_ids){
-	return implode(', ',$user_ids);
-}
-
-
 //add_filter( 'posts_join', 'alt_ipd_join_stats_tables_join' );
 function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	$quiz_id = (int)$quiz_id;
 	global $wpdb;
 	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id 
 									FROM wp_wp_pro_quiz_statistic_ref 
-									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" . $user_ids . "))");
+									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" .implode(', ', array_fill(0, count($user_ids), '%s'))."))");
 	var_dump($results);
 }
 
