@@ -42,7 +42,7 @@ echo alt_ipd_get_stat_refs($quiz_settings['quiz_pro'], alt_ipe_get_group_members
 
 
 
-echo '<h2>ALL YOUR TEMPLATE BELONG TO US!!!</h2>';
+echo '<h2>ALL YOUR TEMPLATE BELONG TO US!!!?</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );

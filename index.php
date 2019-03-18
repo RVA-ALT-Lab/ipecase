@@ -96,7 +96,7 @@ function alt_ipd_join_stats_tables_join($user_ids){
 
 function test_it(){
 	global $wpdb;
-	$sql = "SELECT * FROM wp_wp_pro_quiz_statistic";
+	$sql = 'SELECT * FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic';
 //$ref_ids = $wpdb->get_col( $wpdb->prepare( 'SELECT statistic_ref_id FROM ' . $wpdb->prefix . 'wp_pro_quiz_statistic_ref WHERE  user_id = %d ', $user->ID ) );
 
 
@@ -106,32 +106,4 @@ function test_it(){
 
 
 
-
-//BADDDDDDD
-
-
-add_action( 'gform_after_submission_5', 'gform_site_cloner', 10, 2 );//specific to the gravity form id
-
-function gform_site_cloner($entry, $form){
-
-    $_POST =  [
-	      'action'         => 'process',
-	      'clone_mode'     => 'core',
-	      'source_id'      => rgar( $entry, '3' ), //specific to the form entry fields and should resolve to the ID site to copy
-	      'target_name'    => rgar( $entry, '2' ), //specific to the form entry fields
-	      'target_title'   => rgar( $entry, '2' ), //specific to the form entry fields
-	      'disable_addons' => true,
-	      'clone_nonce'    => wp_create_nonce('ns_cloner')
-	  ];
-	
-	// Setup clone process and run it.
-	$ns_site_cloner = new ns_cloner();
-	$ns_site_cloner->process();
-
-	$site_id = $ns_site_cloner->target_id;
-	$site_info = get_blog_details( $site_id );
-	if ( $site_info ) {
-		// Clone successful!
-	}
-}
 
