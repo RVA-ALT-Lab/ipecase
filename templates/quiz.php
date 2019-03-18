@@ -34,8 +34,8 @@
  * @package LearnDash\Quiz
  */
 
-$quiz_id = (int)$quiz_settings['quiz_pro'];
-var_dump($quiz_id);
+//$quiz_id = (int)$quiz_settings['quiz_pro'];
+//var_dump($quiz_id);
 $group_members = alt_ipe_get_group_members();
 //$group_ids = alt_ipd_get_stat_refs($quiz_id, $group_members);
 // var_dump('members: ');
@@ -44,13 +44,13 @@ print_r($group_members);
 
 
 echo '<h3>stat_refs</h3>';
-echo alt_ipd_get_stat_refs($quiz_id, alt_ipe_get_group_members());
+//echo alt_ipd_get_stat_refs($quiz_id, alt_ipe_get_group_members());
 
 alt_ipd_join_stats_tables_join($group_members, $quiz_id);
 
 
 
-echo '<h2>Greet14</h2>';
+echo '<h2>Greet15</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );
