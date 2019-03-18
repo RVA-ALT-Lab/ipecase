@@ -89,7 +89,7 @@ function alt_ipd_get_stat_refs($quiz_id, $user_ids){
 function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	//$ids = implode(', ',$user_ids);
 	global $wpdb;
-	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id FROM wp_wp_pro_quiz_statistic_ref WHERE user_id IN (" . $user_ids . ") AND quiz_id = " . $quiz_id);
+	$results = $wpdb->get_results( "SELECT statistic_ref_id, quiz_id, user_id FROM wp_wp_pro_quiz_statistic_ref WHERE user_id IN (" . $user_ids . ") AND quiz_id = " $quiz_id);
 	var_dump($results);
 }
 
