@@ -46,9 +46,7 @@ function alt_ipe_get_group_members(){
 	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
 		  }
 		}		
-	$user_ids = alt_ipd_users_to_ids($users);//get their IDs	
-	$user_ids_string = implode(',' $user_ids);
-	return $user_ids_string;
+	return alt_ipd_users_to_ids($users);//get their IDs	
 	}
 //alt_ipd_get_stat_refs($quiz_settings['quiz_pro'], alt_ipe_get_group_members())
 
