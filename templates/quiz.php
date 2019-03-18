@@ -38,11 +38,11 @@ $quiz_id = $quiz_settings['quiz_pro'];
 $group_members = alt_ipe_get_group_members();
 $user_ids = implode(', ', $group_members);
 
-alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
+
+$data = var_dump(alt_ipd_join_stats_tables_join($user_ids, $quiz_id));
+doing_math($data);
 
 
-
-echo '<h2>Greet20</h2>';
 
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );

@@ -100,6 +100,12 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 									ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id
 									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" . $user_ids . "))							
 									");
-	var_dump($results);
+	return $results;
 }
 
+
+function doing_math($data){
+	foreach ($data as $quiz) {
+    	echo  $quiz->answer_data . '<br>';
+	}
+}
