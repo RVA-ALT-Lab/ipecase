@@ -34,7 +34,7 @@
  * @package LearnDash\Quiz
  */
 
-//$quiz_id = (int)$quiz_settings['quiz_pro'];
+$quiz_id = $quiz_settings['quiz_pro'];
 //var_dump($quiz_id);
 $group_members = alt_ipe_get_group_members();
 //$group_ids = alt_ipd_get_stat_refs($quiz_id, $group_members);
