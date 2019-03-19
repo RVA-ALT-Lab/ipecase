@@ -94,7 +94,7 @@ function alt_ipd_users_to_ids($users){
 function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	$quiz_id = (int)$quiz_id;
 	global $wpdb;
-	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.answer_data
+	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count
 									FROM wp_wp_pro_quiz_statistic_ref 
 									INNER JOIN wp_wp_pro_quiz_statistic
 									ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id
@@ -106,6 +106,12 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 
 function doing_math($data){
 	foreach ($data as $quiz) {
-    	echo  $quiz->answer_data . '<br>';
+    	echo  'quiz id: ' .$quiz->quiz_id . ' question_id:' . $quiz->question_id . ' correct_count: ' . $quiz->correct_count .'<br>';
 	}
 }
+
+// SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count  
+// FROM wp_wp_pro_quiz_statistic_ref
+// INNER JOIN wp_wp_pro_quiz_statistic
+// ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id
+// WHERE (wp_wp_pro_quiz_statistic_ref.quiz_id = 14 AND wp_wp_pro_quiz_statistic_ref.user_id IN (1,28))
