@@ -87,6 +87,8 @@ if ( ! empty( $lesson_progression_enabled ) ) {
     if ( $attempts_left ) {
         echo $quiz_content;
     } else {
+    	$data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
+        doing_math($data);
 		?>
 			<p id="learndash_already_taken"><?php echo sprintf( esc_html_x( 'You have already taken this %1$s %2$d time(s) and may not take it again.', 'placeholders: quiz, attempts count', 'learndash' ), LearnDash_Custom_Label::label_to_lower('quiz'), $attempts_count ); ?></p>
 		<?php

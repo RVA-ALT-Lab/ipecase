@@ -111,23 +111,31 @@ function doing_math($data){
 	$sum = 0;
 	$total = 0;
 	$question_number = 1;
-	echo '<h4>Question ' . $question_number . '</h4>';
 	foreach ($data as $quiz) {
      //echo  'quiz id: ' . $quiz->quiz_id . ' question_id:' . $quiz->question_id . ' correct_count: ' . $quiz->correct_count .'<br>';
-     array_push($a, array("question_id"=> $quiz->question_id,"correct_count"=>$quiz->correct_count));
+     //array_push($a, array("question_id"=> $quiz->question_id,"correct_count"=>$quiz->correct_count));
      $sum += $quiz->correct_count;
      $total += 1;
-     if ($previous_value != $quiz->question_id){
-     	$question_number += 1;
+     if ($quiz->question_id === $data[0]->question_id){     
+     	echo '<h4>Question ' . $question_number . '-' . $quiz->question_id . '</h4>';
      	echo 'correct: ' . $sum . '</br>';
      	echo 'total: ' . $total . '</br>';
      	echo 'avg: ' . percent($sum/$total);
-     	echo '<h4>Question ' . $question_number .'</h4>';     	
      	$sum = 0;
      	$total = 0;
      }
-   	 $previous_value = $quiz->question_id;
+     if ($previous_value != $quiz->question_id){
+     	$question_number += 1;     	
+     	echo '<h4>Question ' . $question_number . '-' . $quiz->question_id. '</h4>'; 
+     	echo 'correct: ' . $sum . '</br>';
+     	echo 'total: ' . $total . '</br>';
+     	echo 'avg: ' . percent($sum/$total);    	
+     	$sum = 0;
+     	$total = 0;
+     }
+     	$previous_value = $quiz->question_id;
 	}
+	//var_dump($data);
 }
 
 function percent($number){
