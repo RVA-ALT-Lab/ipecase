@@ -106,9 +106,14 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 
 
 function doing_math($data){
+	$a = [];
 	foreach ($data as $quiz) {
     	echo  'quiz id: ' .$quiz->quiz_id . ' question_id:' . $quiz->question_id . ' correct_count: ' . $quiz->correct_count .'<br>';
+     $a['question_id'] = $quiz->question_id;
+     $a['question_id'] = $quiz->correct_count;
 	}
+	echo '<h2>unique</h2>';
+	print_r(array_unique($a);
 }
 
 // SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count  
