@@ -39,8 +39,8 @@ $group_members = alt_ipe_get_group_members();
 $user_ids = implode(', ', $group_members);
 
 
-$data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
-doing_math($data);
+// $data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
+// doing_math($data);
 
 
 

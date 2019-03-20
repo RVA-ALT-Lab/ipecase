@@ -94,11 +94,13 @@ function alt_ipd_users_to_ids($users){
 function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	$quiz_id = (int)$quiz_id;
 	global $wpdb;
-	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count
+	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.answer_data AS answer_choice, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count, wp_wp_pro_quiz_question.title, wp_wp_pro_quiz_question.question,  wp_wp_pro_quiz_question.answer_data
 									FROM wp_wp_pro_quiz_statistic_ref 
 									INNER JOIN wp_wp_pro_quiz_statistic
 									ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id
-									WHERE (quiz_id =" . $quiz_id . " AND user_id IN (" . $user_ids . "))
+									JOIN wp_wp_pro_quiz_question
+									ON wp_wp_pro_quiz_question.id = wp_wp_pro_quiz_statistic.question_id
+									WHERE (wp_wp_pro_quiz_statistic_ref.quiz_id =" . $quiz_id . " AND wp_wp_pro_quiz_statistic_ref.user_id IN (" . $user_ids . "))
 									ORDER BY question_id ASC
 									");
 	return $results;
@@ -107,34 +109,16 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 
 function doing_math($data){
 	$a = [];
-	$previous_value = $data[0]->question_id;
-	$sum = 0;
-	$total = 0;
-	$question_number = 1;
-	foreach ($data as $quiz) {
-     //echo  'quiz id: ' . $quiz->quiz_id . ' question_id:' . $quiz->question_id . ' correct_count: ' . $quiz->correct_count .'<br>';
-     //array_push($a, array("question_id"=> $quiz->question_id,"correct_count"=>$quiz->correct_count));
-     $sum += $quiz->correct_count;
-     $total += 1;
-     if ($quiz->question_id === $data[0]->question_id){     
-     	echo '<h4>Question ' . $question_number . '-' . $quiz->question_id . '</h4>';
-     	echo 'correct: ' . $sum . '</br>';
-     	echo 'total: ' . $total . '</br>';
-     	echo 'avg: ' . percent($sum/$total);
-     	$sum = 0;
-     	$total = 0;
-     }
-     if ($previous_value != $quiz->question_id){
-     	$question_number += 1;     	
-     	echo '<h4>Question ' . $question_number . '-' . $quiz->question_id. '</h4>'; 
-     	echo 'correct: ' . $sum . '</br>';
-     	echo 'total: ' . $total . '</br>';
-     	echo 'avg: ' . percent($sum/$total);    	
-     	$sum = 0;
-     	$total = 0;
-     }
-     	$previous_value = $quiz->question_id;
+	foreach ($data as $key => $quiz) {
+     echo 'question:' . $quiz->title . '<br>' . $quiz->question. '<br>' .' answer_choice: ' . $quiz->answer_choice . ' key: ' . $key .'<br>';
+	if (find_key_value($a, 'question_id', (int)$quiz->question_id)){
+		update_question_data($a, (int)$quiz->question_id);
+		} else {
+			array_push($a, array("question_id"=> (int)$quiz->question_id,"answer_data"=>(int)$quiz->answer_data,"total_count"=>1));
+		}
+     	
 	}
+	//print_r($a);
 	//var_dump($data);
 }
 
@@ -143,8 +127,24 @@ function percent($number){
     return $number * 100 . '%';
 }
 
-// SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count  
-// FROM wp_wp_pro_quiz_statistic_ref
-// INNER JOIN wp_wp_pro_quiz_statistic
-// ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id
-// WHERE (wp_wp_pro_quiz_statistic_ref.quiz_id = 14 AND wp_wp_pro_quiz_statistic_ref.user_id IN (1,28))
+
+function find_key_value($array, $key, $val){
+    foreach ($array as $item)
+    {
+        if (is_array($item) && find_key_value($item, $key, $val)) return true;
+
+        if (isset($item[$key]) && $item[$key] == $val) return true;
+    }
+
+    return false;
+}
+
+function update_question_data($a, $question_id){
+		foreach ($a as $key => &$question) {
+			//echo 'a -' .$key . '<br>';
+			if($question['question_id'] === $question_id){
+				//echo 'DUP: ' .$question_id . ' key: ' . $key . ' question[answer_data] ' .$question['answer_data'] . '<br>';
+				//$a[$key]['total_count'] = 500;
+			}
+	}
+}
