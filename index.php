@@ -110,17 +110,27 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 function doing_math($data){
 	$a = [];
 	foreach ($data as $key => $quiz) {
-     echo 'question:' . $quiz->title . '<br>' . $quiz->question. '<br>' .' answer_choice: ' . $quiz->answer_choice . ' key: ' . $key .'<br>';
 	if (find_key_value($a, 'question_id', (int)$quiz->question_id)){
 		update_question_data($a, (int)$quiz->question_id);
 		} else {
-			array_push($a, array("question_id"=> (int)$quiz->question_id,"answer_data"=>(int)$quiz->answer_data,"total_count"=>1));
+			$answer_text = [];
+			$get_answer_text = maybe_unserialize($quiz->answer_data);
+			$response_choices = substr($quiz->answer_choice, 1, -1);
+			$response_choices = explode(",", $response_choices);
+			foreach ($get_answer_text as $key => $data)
+			{
+				$choice_count = $response_choices[$key];
+			    array_push($answer_text, array($data->getAnswer()=>$choice_count));
+			}
+			array_push($a, array("question_id"=> (int)$quiz->question_id,array("question_title"=>$quiz->title,"question"=>$quiz->question), $answer_text));
 		}
      	
 	}
 	//print_r($a);
+	print("<pre>".print_r($a,true)."</pre>");
 	//var_dump($data);
 }
+
 
 function percent($number){
 	$number = number_format((float)$number, 2, '.', '');
@@ -143,8 +153,7 @@ function update_question_data($a, $question_id){
 		foreach ($a as $key => &$question) {
 			//echo 'a -' .$key . '<br>';
 			if($question['question_id'] === $question_id){
-				//echo 'DUP: ' .$question_id . ' key: ' . $key . ' question[answer_data] ' .$question['answer_data'] . '<br>';
-				//$a[$key]['total_count'] = 500;
+				
 			}
 	}
 }
