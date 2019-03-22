@@ -94,37 +94,42 @@ function alt_ipd_users_to_ids($users){
 function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	$quiz_id = (int)$quiz_id;
 	global $wpdb;
-	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.answer_data AS answer_choice, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count, wp_wp_pro_quiz_question.title, wp_wp_pro_quiz_question.question,  wp_wp_pro_quiz_question.answer_data
-									FROM wp_wp_pro_quiz_statistic_ref 
-									INNER JOIN wp_wp_pro_quiz_statistic
-									ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id
-									JOIN wp_wp_pro_quiz_question
-									ON wp_wp_pro_quiz_question.id = wp_wp_pro_quiz_statistic.question_id
-									WHERE (wp_wp_pro_quiz_statistic_ref.quiz_id =" . $quiz_id . " AND wp_wp_pro_quiz_statistic_ref.user_id IN (" . $user_ids . "))
-									ORDER BY question_id ASC
-									");
+	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.answer_data AS answer_choice, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count, wp_wp_pro_quiz_question.title, wp_wp_pro_quiz_question.question, wp_wp_pro_quiz_question.answer_data FROM wp_wp_pro_quiz_statistic_ref INNER JOIN wp_wp_pro_quiz_statistic ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id JOIN wp_wp_pro_quiz_question ON wp_wp_pro_quiz_question.id = wp_wp_pro_quiz_statistic.question_id WHERE (wp_wp_pro_quiz_statistic_ref.quiz_id =" . $quiz_id . " AND wp_wp_pro_quiz_statistic_ref.user_id IN (" . $user_ids . ")) ORDER BY question_id ASC");
 	return $results;
 }
 
 
+class Quiz_summary {
+	public function __construct($question_id, $question_title, $question_statement, $answers) {
+		$this->question_id = $question_id;
+		$this->question_title = $question_title;
+		$this->question_statement = $question_statement;
+	}
+}
+
 function doing_math($data){
 	$a = [];
 	foreach ($data as $key => $quiz) {
-     echo 'question:' . $quiz->title . '<br>' . $quiz->question. '<br>' .' answer_choice: ' . $quiz->answer_choice . ' key: ' . $key .'<br>';
+	echo '<h2>q id:' . $quiz->question_id . ' data key:' . $key . '</h2>';
 	if (find_key_value($a, 'question_id', (int)$quiz->question_id)){
-		update_question_data($a, (int)$quiz->question_id);
+		update_question_data($a, $quiz->question_id);//RUNS FOR DUPLICATE IDS ONLY 
 		} else {
-			array_push($a, array("question_id"=> (int)$quiz->question_id,"answer_data"=>(int)$quiz->answer_data,"total_count"=>1));
+			$answer_text = [];
+			$get_answer_text = maybe_unserialize($quiz->answer_data);
+			$response_choices = substr($quiz->answer_choice, 1, -1);
+			$response_choices = explode(",", $response_choices);
+			foreach ($get_answer_text as $key => $data)
+			{
+				$choice_count = $response_choices[$key];
+			    array_push($answer_text, array($data->getAnswer()=>$choice_count));
+			}
+			array_push($a, array("question_id"=> (int)$quiz->question_id,array("question_title"=>$quiz->title,"question"=>$quiz->question), $answer_text));
 		}
      	
 	}
 	//print_r($a);
+	//print("<pre>".print_r($a,true)."</pre>");
 	//var_dump($data);
-}
-
-function percent($number){
-	$number = number_format((float)$number, 2, '.', '');
-    return $number * 100 . '%';
 }
 
 
@@ -141,10 +146,15 @@ function find_key_value($array, $key, $val){
 
 function update_question_data($a, $question_id){
 		foreach ($a as $key => &$question) {
-			//echo 'a -' .$key . '<br>';
-			if($question['question_id'] === $question_id){
-				//echo 'DUP: ' .$question_id . ' key: ' . $key . ' question[answer_data] ' .$question['answer_data'] . '<br>';
-				//$a[$key]['total_count'] = 500;
+			echo 'passed a key: ' .$key . ' passed q_id: ' . $question_id . ' a[q_id]' . $a[$key]['question_id']. '<br>';
+			$responses = $question[1];
+			foreach ($responses as $key => $response) {
+				echo key($response) . ' - ';
+				echo $response[key($response)] . '<br>';
+				$a[$key][key($response)] = 23;
+				print("<pre>".print_r($response,true)."</pre>");				
 			}
 	}
+		print("<pre>".print_r($a,true)."</pre>");
+
 }
