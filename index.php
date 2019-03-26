@@ -146,12 +146,12 @@ function find_key_value($array, $key, $val){
 
 function update_question_data($a, $question_id){
 		foreach ($a as $key => &$question) {
-			echo 'passed a key: ' .$key . ' passed q_id: ' . $question_id . ' a[q_id]' . $a[$key]['question_id']. '<br>';
+			echo 'passed a key: ' . $key . ' passed q_id: ' . $question_id . ' a[q_id]' . $a[$key]['question_id']. '<br>';
 			$responses = $question[1];
-			foreach ($responses as $key => $response) {
-				echo key($response) . ' - ';
+			foreach ($responses as $key_two => $response) {
+				echo key($response) . ' - key2: ' . $key_two;
 				echo $response[key($response)] . '<br>';
-				$a[$key][key($response)] = 23;
+				$a[$key][1][$key_two][key($response)] = $a[$key][1][$key_two][key($response)] + $response[key($response)];
 				print("<pre>".print_r($response,true)."</pre>");				
 			}
 	}
