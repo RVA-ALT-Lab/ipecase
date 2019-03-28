@@ -99,20 +99,34 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 }
 
 
-class Quiz_summary {
-	public function __construct($question_id, $question_title, $question_statement, $answers) {
-		$this->question_id = $question_id;
-		$this->question_title = $question_title;
-		$this->question_statement = $question_statement;
-	}
-}
-
 function doing_math($data){
 	$a = [];
-	foreach ($data as $key => $quiz) {
-	echo '<h2>q id:' . $quiz->question_id . ' data key:' . $key . '</h2>';
-	if (find_key_value($a, 'question_id', (int)$quiz->question_id)){
-		update_question_data($a, $quiz->question_id);//RUNS FOR DUPLICATE IDS ONLY 
+	foreach ($data as $alpha_key => $quiz) {
+	echo '<h2>question id:' . $quiz->question_id . ' data key:' . $alpha_key . '</h2>';
+	if (find_key_value($a, 'question_id', (int)$quiz->question_id)){ //IF ALREADY EXISTS IN QUESTION ARRAY DO THIS
+		//$answer_text = [];
+		$question_index = count($a);
+		$answer_text = [];
+		$get_answer_text = maybe_unserialize($quiz->answer_data);
+		$response_choices = substr($quiz->answer_choice, 1, -1);
+		$response_choices = explode(",", $response_choices);
+		foreach ($get_answer_text as $key => $data)
+			{
+				$choice_count = $response_choices[$key];
+			    array_push($answer_text, array($data->getAnswer()=>(int)$choice_count));
+			}
+			// var_dump($answer_text);
+		foreach ($answer_text as $key => $data)
+			{
+				
+				$choice_key = key($data);
+				$choice_value = $data[$choice_key];
+				// print("<pre>".print_r((array)$data,true)."</pre>");
+				// var_dump($choice_value);
+				// var_dump($choice_key);
+		update_question_data($a, $key, $choice_key, $choice_value);//RUNS FOR DUPLICATE IDS ONLY 
+			}
+
 		} else {
 			$answer_text = [];
 			$get_answer_text = maybe_unserialize($quiz->answer_data);
@@ -121,16 +135,26 @@ function doing_math($data){
 			foreach ($get_answer_text as $key => $data)
 			{
 				$choice_count = $response_choices[$key];
-			    array_push($answer_text, array($data->getAnswer()=>$choice_count));
+			    array_push($answer_text, array($data->getAnswer()=>(int)$choice_count));
 			}
 			array_push($a, array("question_id"=> (int)$quiz->question_id,array("question_title"=>$quiz->title,"question"=>$quiz->question), $answer_text));
 		}
-     	
+		// echo '<h2>OG</h2>';
 	}
-	//print_r($a);
-	//print("<pre>".print_r($a,true)."</pre>");
-	//var_dump($data);
+	 print("<pre>".print_r($a,true)."</pre>");		
 }
+
+
+function update_question_data($a, $key, $choice_key, $choice_value){
+	$responses = end($a)[1];
+	$responses[$key][$choice_key] = (int)$responses[$key][$choice_key] + (int)$choice_value;
+	print("<pre>".print_r($responses,true)."</pre>");
+	print("<pre>".print_r('responses key: ' .key($responses[$key]),true)."</pre>");
+	print("<pre>".print_r('responses key value: ' . $responses[$key][$choice_key],true)."</pre>");
+	print("<pre>".print_r('choice_value: ' . $choice_value,true)."</pre>");		
+
+}
+
 
 
 function find_key_value($array, $key, $val){
@@ -142,19 +166,4 @@ function find_key_value($array, $key, $val){
     }
 
     return false;
-}
-
-function update_question_data($a, $question_id){
-		foreach ($a as $key => &$question) {
-			echo 'passed a key: ' . $key . ' passed q_id: ' . $question_id . ' a[q_id]' . $a[$key]['question_id']. '<br>';
-			$responses = $question[1];
-			foreach ($responses as $key_two => $response) {
-				echo key($response) . ' - key2: ' . $key_two;
-				echo $response[key($response)] . '<br>';
-				$a[$key][1][$key_two][key($response)] = $a[$key][1][$key_two][key($response)] + $response[key($response)];
-				print("<pre>".print_r($response,true)."</pre>");				
-			}
-	}
-		print("<pre>".print_r($a,true)."</pre>");
-
 }
