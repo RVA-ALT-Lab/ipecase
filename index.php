@@ -155,10 +155,10 @@ function group_responses_printer($data){
 		foreach ($responses as $key => $response) {
 			$answer = key($response);
 			$value = $response[$answer];
-			if ($value > 1){
-				$plural = 's';
-			} else {
+			if ($value == 1){
 				$plural = '';
+			} else {
+				$plural = 's';
 			}
 			$html .= $value . ' member' . $plural . ' chose ' . $answer . '<br>';
 		}
