@@ -102,7 +102,6 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 function doing_math($data){
 	$a = [];
 	foreach ($data as $alpha_key => $quiz) {
-	echo '<h2>question id:' . $quiz->question_id . ' data key:' . $alpha_key . '</h2>';
 	if (find_key_value($a, 'question_id', (int)$quiz->question_id)){ //IF ALREADY EXISTS IN QUESTION ARRAY DO THIS
 		//$answer_text = [];
 		$question_index = count($a);
@@ -119,10 +118,7 @@ function doing_math($data){
 		foreach ($answer_text as $key => $data)
 			{				
 				$choice_key = key($data);
-				$choice_value = $data[$choice_key];
-				//print("<pre>".print_r((array)$data,true)."</pre>");
-				// var_dump($choice_value);
-				// var_dump($choice_key);
+				$choice_value = $data[$choice_key];				
 				update_question_data($a, $key, $choice_key, $choice_value, $a_value);//RUNS FOR DUPLICATE IDS ONLY 
 			}
 
@@ -138,25 +134,37 @@ function doing_math($data){
 			}
 			array_push($a, array("question_id"=> (int)$quiz->question_id,array("question_title"=>$quiz->title,"question"=>$quiz->question), $answer_text));
 		}
-		// echo '<h2>OG</h2>';
 	}
-	 print("<pre>".print_r($a,true)."</pre>");		
+	//print("<pre>".print_r($a,true)."</pre>");	
+	return $a;	
 }
 
 
 function update_question_data(&$a, $key, $choice_key, $choice_value, $a_value){
 	$response = &$a[$a_value][1][$key];
-	$response[$choice_key] =  (int)$response[$choice_key] + (int)$choice_value;
-	print("<pre>".print_r($response,true)."</pre>");
-	print("<pre>".print_r('responses key: ' .key($response),true)."</pre>");
-	print("<pre>".print_r('responses key value: ' . $response[$choice_key],true)."</pre>");
-	print("<pre>".print_r('choice_value: ' . $choice_value,true)."</pre>");	
-	//return $a;	
-	//print("<pre>".print_r($a,true)."</pre>");
-	//return $a;		
+	$response[$choice_key] =  (int)$response[$choice_key] + (int)$choice_value;			
 }
 
-
+function group_responses_printer($data){
+	$html = '<div class="full-question-data">';
+	foreach ($data as $key => $question){
+		$question_title = $question[0]['question_title'];
+		$question_text = $question[0]['question'];
+		$html .= '<div class="question-summary"><h3>' . $question_title . ' - ' . $question_text . '</h3></div>';
+		$responses = $question[1];
+		foreach ($responses as $key => $response) {
+			$answer = key($response);
+			$value = $response[$answer];
+			if ($value > 1){
+				$plural = 's';
+			} else {
+				$plural = '';
+			}
+			$html .= $value . ' member' . $plural . ' chose ' . $answer . '<br>';
+		}
+	}
+	return $html . '</div>';
+}
 
 function find_key_value($array, $key, $val){
     foreach ($array as $item)
