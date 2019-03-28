@@ -110,21 +110,20 @@ function doing_math($data){
 		$get_answer_text = maybe_unserialize($quiz->answer_data);
 		$response_choices = substr($quiz->answer_choice, 1, -1);
 		$response_choices = explode(",", $response_choices);
+		$a_value = count($a)-1;
 		foreach ($get_answer_text as $key => $data)
 			{
 				$choice_count = $response_choices[$key];
 			    array_push($answer_text, array($data->getAnswer()=>(int)$choice_count));
 			}
-			// var_dump($answer_text);
 		foreach ($answer_text as $key => $data)
-			{
-				
+			{				
 				$choice_key = key($data);
 				$choice_value = $data[$choice_key];
-				// print("<pre>".print_r((array)$data,true)."</pre>");
+				//print("<pre>".print_r((array)$data,true)."</pre>");
 				// var_dump($choice_value);
 				// var_dump($choice_key);
-		update_question_data($a, $key, $choice_key, $choice_value);//RUNS FOR DUPLICATE IDS ONLY 
+				update_question_data($a, $key, $choice_key, $choice_value, $a_value);//RUNS FOR DUPLICATE IDS ONLY 
 			}
 
 		} else {
@@ -145,14 +144,16 @@ function doing_math($data){
 }
 
 
-function update_question_data($a, $key, $choice_key, $choice_value){
-	$responses = end($a)[1];
-	$responses[$key][$choice_key] = (int)$responses[$key][$choice_key] + (int)$choice_value;
-	print("<pre>".print_r($responses,true)."</pre>");
-	print("<pre>".print_r('responses key: ' .key($responses[$key]),true)."</pre>");
-	print("<pre>".print_r('responses key value: ' . $responses[$key][$choice_key],true)."</pre>");
-	print("<pre>".print_r('choice_value: ' . $choice_value,true)."</pre>");		
-
+function update_question_data(&$a, $key, $choice_key, $choice_value, $a_value){
+	$response = &$a[$a_value][1][$key];
+	$response[$choice_key] =  (int)$response[$choice_key] + (int)$choice_value;
+	print("<pre>".print_r($response,true)."</pre>");
+	print("<pre>".print_r('responses key: ' .key($response),true)."</pre>");
+	print("<pre>".print_r('responses key value: ' . $response[$choice_key],true)."</pre>");
+	print("<pre>".print_r('choice_value: ' . $choice_value,true)."</pre>");	
+	//return $a;	
+	//print("<pre>".print_r($a,true)."</pre>");
+	//return $a;		
 }
 
 
