@@ -182,9 +182,16 @@ function ipe_proctor_view(){
 	$group_members = alt_ipe_get_group_members_leader();
 	$proctor_scores = [];
 	$gradebook_contents = get_post_meta(785,'ld_gb_components', true);//all the gradebook info - associated w post ID which you can find via https://ipecase.org/VCU/wp-admin/edit.php?post_type=gradebook
-	$i = maybe_unserialize($gradebook_contents);
+	$gradebook = maybe_unserialize($gradebook_contents);
+	$proctor_assignments = [];
+	foreach ($gradebook as $key => $assignment) {
+		$assignment_name = strtolower($assignment['name']);//make it lower case for match below
+		if (strpos($assignment_name, 'proctor') !== false ){
+			array_push($proctor_assignments, array($assignment['name'] => $assignment['id']));
+		}
+	}
 	//grades are in wp_usermeta at patters like ld_gb_manual_grades_785_1 (785 being the gradebook) and 1 being the item
-	print("<pre>".print_r($i,true)."</pre>");	
+	print("<pre>".print_r($proctor_assignments,true)."</pre>");	
 	var_dump($group_members);
 }
 add_shortcode( 'proctor', 'ipe_proctor_view' );
