@@ -155,7 +155,7 @@ function group_responses_printer($data){
 		foreach ($responses as $key => $response) {
 			$answer = key($response);
 			$value = $response[$answer];
-			if ($value == 1){
+			if ($value === 1){
 				$plural = '';
 			} else {
 				$plural = 's';
@@ -176,3 +176,29 @@ function find_key_value($array, $key, $val){
 
     return false;
 }
+
+
+function ipe_proctor_view(){
+	$group_members = alt_ipe_get_group_members_leader();
+	$proctor_scores = [];
+	$gradebook_contents = get_post_meta(785,'ld_gb_components', true);//all the gradebook info - associated w post ID which you can find via https://ipecase.org/VCU/wp-admin/edit.php?post_type=gradebook
+	$i = maybe_unserialize($gradebook_contents);
+	//grades are in wp_usermeta at patters like ld_gb_manual_grades_785_1 (785 being the gradebook) and 1 being the item
+	print("<pre>".print_r($i,true)."</pre>");	
+	var_dump($group_members);
+}
+add_shortcode( 'proctor', 'ipe_proctor_view' );
+
+//GET GRP ID FROM LEARN DASH GROUPS which is in the metadata for the logged in user
+function alt_ipe_get_group_members_leader(){
+	$user_id = get_current_user_id();//get logged in user
+	$user = get_user_meta($user_id,'');	//get user ID
+	foreach($user as $key=>$value){//cycle through metadata looking for learndash partial match
+	  $i = substr($key,0,24);
+	  //print("<pre>".print_r($i,true)."</pre>");	
+	  if("learndash_group_leaders_" == substr($key,0,24)){ //such a mess to do partial match
+	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
+		  }
+		}		
+	 return alt_ipd_users_to_ids($users);//get user ids with matching groups
+	}
