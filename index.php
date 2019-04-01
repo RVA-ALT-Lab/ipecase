@@ -22,8 +22,8 @@ function alt_ipe_load_scripts() {
     $deps = array();
     $version= '1.0'; 
     $in_footer = true;    
-    wp_enqueue_script('prefix-main-js', plugin_dir_url( __FILE__) . 'js/prefix-main.js', $deps, $version, $in_footer); 
-    wp_enqueue_style( 'prefix-main-css', plugin_dir_url( __FILE__) . 'css/prefix-main.css');
+    wp_enqueue_script('ipe-main-js', plugin_dir_url( __FILE__) . 'js/ipe-main.js', $deps, $version, $in_footer); 
+    wp_enqueue_style( 'ipe-main-css', plugin_dir_url( __FILE__) . 'css/ipe-main.css');
 }
  
 
@@ -179,6 +179,7 @@ function find_key_value($array, $key, $val){
 
 
 function ipe_proctor_view(){
+	$html = '';
 	$group_members = alt_ipe_get_group_members_leader();
 	$proctor_scores = [];
 	$gradebook_contents = get_post_meta(785,'ld_gb_components', true);//all the gradebook info - associated w post ID which you can find via https://ipecase.org/VCU/wp-admin/edit.php?post_type=gradebook
@@ -190,22 +191,76 @@ function ipe_proctor_view(){
 			array_push($proctor_assignments, array($assignment['name'] => $assignment['id']));
 		}
 	}
+	$html = '<div class="proctor-grades"><div class="empty-cell assignment-title assignment-cell"></div>';
+	foreach ($proctor_assignments as $key => $assignment) {
+		$html .= '<div class="column assignment-title">' . key($assignment) . '</div>';
+	}
+	foreach ($group_members as $key => $member) {
+		$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) .'</div>';
+		$user_id = $member[key($member)];
+		foreach ($proctor_assignments as $key => $assignment) {
+			$assignment_id = $assignment[key($assignment)];
+			$score = return_assignment_score($user_id, $assignment_id);
+			$html .= '<div class="proctor-assignment assignment-cell">' . selected_proctor_score($score, $user_id, $assignment_id) . '</div>';
+		}
+
+	}
 	//grades are in wp_usermeta at patters like ld_gb_manual_grades_785_1 (785 being the gradebook) and 1 being the item
-	print("<pre>".print_r($proctor_assignments,true)."</pre>");	
-	var_dump($group_members);
+	//print("<pre>".print_r($proctor_assignments,true)."</pre>");	
+	//print("<pre>".print_r($group_members,true)."</pre>");	
+	return $html;
 }
 add_shortcode( 'proctor', 'ipe_proctor_view' );
 
+function return_assignment_score($user_id, $assignment_id){
+	$assignment = get_user_meta($user_id,'ld_gb_manual_grades_785_'. $assignment_id, true);
+	if ($assignment){
+		return $assignment[0]['score'];
+	}
+}
+
 //GET GRP ID FROM LEARN DASH GROUPS which is in the metadata for the logged in user
 function alt_ipe_get_group_members_leader(){
+	global $user;
 	$user_id = get_current_user_id();//get logged in user
-	$user = get_user_meta($user_id,'');	//get user ID
-	foreach($user as $key=>$value){//cycle through metadata looking for learndash partial match
+	$user = get_user_meta($user_id);	//get user ID
+	foreach($user as $key => $value){//cycle through metadata looking for learndash partial match
 	  $i = substr($key,0,24);
 	  //print("<pre>".print_r($i,true)."</pre>");	
 	  if("learndash_group_leaders_" == substr($key,0,24)){ //such a mess to do partial match
 	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
 		  }
 		}		
-	 return alt_ipd_users_to_ids($users);//get user ids with matching groups
+	 return alt_ipd_users_for_proctor_view($users);//get user ids with matching groups
 	}
+
+
+function alt_ipd_users_for_proctor_view($users){
+	$user_ids = [];
+	foreach ($users as $user) {
+		$name =  $user->display_name;
+		array_push($user_ids, array($name =>$user->ID));
+	}
+	return $user_ids;
+}
+
+function selected_proctor_score($score, $user_id, $assignment_id){
+	$scores = [
+			'unscored'=>'unscored',
+			'0 - unsatisfactory' => 50, 
+			'1 - needs improvement' => 75, 
+			'2 - satisfactory' => 85, 
+			'3 - excellent' => 100];
+	$html = '<select name="proctor-grade" data-user="'.$user_id.'" data-assignment="'.$assignment_id.'">' ;
+		foreach ($scores as $key => $value) {
+			if ($value == $score ){
+				$selected = 'selected="selected"';
+			} else {
+				$selected = '';
+			}
+			$html .= '<option value="'. $value .'"' . $selected . '>' . $key . '</option>';
+			//  <option value="100">3 - excellent</option>
+		}
+	$html .= '</select>';
+	return $html;
+}
