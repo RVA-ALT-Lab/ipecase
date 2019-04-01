@@ -24,8 +24,12 @@ function alt_ipe_load_scripts() {
     $in_footer = true;    
     wp_enqueue_script('ipe-main-js', plugin_dir_url( __FILE__) . 'js/ipe-main.js', $deps, $version, $in_footer); 
     wp_enqueue_style( 'ipe-main-css', plugin_dir_url( __FILE__) . 'css/ipe-main.css');
+    wp_localize_script( 'ipe-main-js', 'proctor_score', array(
+		'ajax_url' => admin_url( 'admin-ajax.php' )
+	));
 }
- 
+add_action('wp_enqueue_scripts', 'alt_ipe_load_scripts');
+
 
 /*
 **
@@ -178,6 +182,7 @@ function find_key_value($array, $key, $val){
 }
 
 
+
 function ipe_proctor_view(){
 	$html = '';
 	$group_members = alt_ipe_get_group_members_leader();
@@ -263,4 +268,20 @@ function selected_proctor_score($score, $user_id, $assignment_id){
 		}
 	$html .= '</select>';
 	return $html;
+}
+
+
+add_action( 'wp_ajax_update_proctor_grades', 'update_proctor_grades' );
+
+function update_proctor_grades(){
+	$user_id = $_POST['user_id'];
+	$assignment_id =  $_POST['assignment_id'];
+	$score =  $_POST['assignment_score'];
+	$db_score = array();
+	array_push($db_score, array('score'=>$score, 'name'=>'nothing', 'status'=>'', 'component'=>1));
+	$serialized = $db_score; //it appears that it's serializing it without me
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) { 
+	 	 update_user_meta($user_id, 'ld_gb_manual_grades_785_' . $assignment_id, $serialized);
+	 	}
+	 	die();
 }
