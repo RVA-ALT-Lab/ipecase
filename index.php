@@ -201,11 +201,14 @@ function ipe_proctor_view(){
 		$html .= '<div class="column assignment-title">' . key($assignment) . '</div>';
 	}
 	foreach ($group_members as $key => $member) {
-		$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) .'</div>';
+		if ($member['group'] != $group_members[$key-1]['group'] && $key != 0 ){
+			$html .= '<div class="cover"> <h2>'. $member['group'] . '/'. $group_members[$key-1]['group'].'</h2></div>';
+		}
+		$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) . '</div>';
 		$user_id = $member[key($member)];
 		foreach ($proctor_assignments as $key => $assignment) {
 			$assignment_id = $assignment[key($assignment)];
-			$score = return_assignment_score($user_id, $assignment_id);
+			$score = return_assignment_score($user_id, $assignment_id);     
 			$html .= '<div class="proctor-assignment assignment-cell">' . selected_proctor_score($score, $user_id, $assignment_id) . '</div>';
 		}
 
@@ -229,25 +232,33 @@ function alt_ipe_get_group_members_leader(){
 	global $user;
 	$user_id = get_current_user_id();//get logged in user
 	$user = get_user_meta($user_id);	//get user ID
+	$all_users = [];
 	foreach($user as $key => $value){//cycle through metadata looking for learndash partial match
 	  $i = substr($key,0,24);
-	  //print("<pre>".print_r($i,true)."</pre>");	
-	  if("learndash_group_leaders_" == substr($key,0,24)){ //such a mess to do partial match
-	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
+	 
+	  if("learndash_group_leaders_" == substr($key,0,24)){ //such a mess to do partial match	   		
+	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field	
+	   		$group_id =  $value[0];
+	   		//print("<pre>".print_r(alt_ipd_users_for_proctor_view($users),true)."</pre>");	
+	   		foreach ($users as $key => $student) {
+				$name =  $student->display_name;
+				array_push($all_users, array($name =>$student->ID, 'group'=>$group_id));
+			}
 		  }
-		}		
-	 return alt_ipd_users_for_proctor_view($users);//get user ids with matching groups
+		}	
+		//print("<pre>".print_r($all_users,true)."</pre>");	
+	 return $all_users;//get user ids with matching groups
 	}
 
-
-function alt_ipd_users_for_proctor_view($users){
-	$user_ids = [];
-	foreach ($users as $user) {
-		$name =  $user->display_name;
-		array_push($user_ids, array($name =>$user->ID));
-	}
-	return $user_ids;
-}
+//RENDERED REDUNDANT
+// function alt_ipd_users_for_proctor_view($users){
+// 	$user_ids = [];
+// 	foreach ($users as $user) {
+// 		$name =  $user->display_name;
+// 		array_push($user_ids, array($name =>$user->ID));
+// 	}
+// 	return $user_ids;
+// }
 
 function selected_proctor_score($score, $user_id, $assignment_id){
 	$scores = [
