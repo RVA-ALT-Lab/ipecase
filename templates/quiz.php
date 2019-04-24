@@ -43,7 +43,6 @@ $user_ids = implode(', ', $group_members);
 // doing_math($data);
 
 
-
 if ( ! empty( $lesson_progression_enabled ) ) {
 	$last_incomplete_step = is_quiz_accessable( null, $post, true );
 	if ( 1 !== $last_incomplete_step ) {
@@ -86,9 +85,13 @@ if ( ! empty( $lesson_progression_enabled ) ) {
     echo $content;
     if ( $attempts_left ) {
         echo $quiz_content;
-    } else {
+    } else {   
+    	echo '<h2>Group Data</h2>';
+    	echo '<p>This shows how your group has done in aggregate.</p>';
     	$data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
-        doing_math($data);
+        $a = doing_math($data); 	
+        echo group_responses_printer($a);
+        
 		?>
 			<p id="learndash_already_taken"><?php echo sprintf( esc_html_x( 'You have already taken this %1$s %2$d time(s) and may not take it again.', 'placeholders: quiz, attempts count', 'learndash' ), LearnDash_Custom_Label::label_to_lower('quiz'), $attempts_count ); ?></p>
 		<?php

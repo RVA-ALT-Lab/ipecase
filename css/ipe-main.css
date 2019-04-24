@@ -1,0 +1,18 @@
+.proctor-grades {
+	display: grid;
+	grid-template-columns: repeat(6, 150px);
+    grid-gap: 10px;
+}
+
+.proctor-grades div{	
+	padding: 5px;
+	border: 1px solid #efefef;
+}
+
+.proctor-grades select {
+	width: 100px;
+}
+
+.proctor-grades .cover {
+	grid-column: 1 / span 6;
+}

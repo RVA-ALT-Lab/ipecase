@@ -201,15 +201,21 @@ function ipe_proctor_view(){
 		$html .= '<div class="column assignment-title">' . key($assignment) . '</div>';
 	}
 	foreach ($group_members as $key => $member) {
-		if ($member['group'] != $group_members[$key-1]['group'] && $key != 0 ){
-			$html .= '<div class="cover"> <h2>'. $member['group'] . '/'. $group_members[$key-1]['group'].'</h2></div>';
+		if (isset($group_members[$key-1]['group'])){
+			$check = $group_members[$key-1]['group'];
+		} else {
+			$check = 'foo';
+		}
+		if ($member['group'] !=  $check && $key != 0 ){
+			$html .= '<div class="cover"> <h2>'. $member['group'] .'</h2></div>';
 		}
 		$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) . '</div>';
 		$user_id = $member[key($member)];
 		foreach ($proctor_assignments as $key => $assignment) {
 			$assignment_id = $assignment[key($assignment)];
-			$score = return_assignment_score($user_id, $assignment_id);     
-			$html .= '<div class="proctor-assignment assignment-cell">' . selected_proctor_score($score, $user_id, $assignment_id) . '</div>';
+			$score = return_assignment_score($user_id, $assignment_id);
+			$comment = return_assignment_comment($user_id, $assignment_id);     
+			$html .= '<div class="proctor-assignment assignment-cell">' . selected_proctor_score($score, $user_id, $assignment_id, $comment) . '</div>';
 		}
 
 	}
@@ -224,6 +230,13 @@ function return_assignment_score($user_id, $assignment_id){
 	$assignment = get_user_meta($user_id,'ld_gb_manual_grades_785_'. $assignment_id, true);
 	if ($assignment){
 		return $assignment[0]['score'];
+	}
+}
+
+function return_assignment_comment($user_id, $assignment_id){
+	$assignment = get_user_meta($user_id,'ld_gb_manual_grades_785_'. $assignment_id, true);
+	if ($assignment){
+		return $assignment[0]['name'];
 	}
 }
 
@@ -260,14 +273,14 @@ function alt_ipe_get_group_members_leader(){
 // 	return $user_ids;
 // }
 
-function selected_proctor_score($score, $user_id, $assignment_id){
+function selected_proctor_score($score, $user_id, $assignment_id, $assignment_comment){
 	$scores = [
 			'unscored'=>'unscored',
 			'0 - unsatisfactory' => 50, 
 			'1 - needs improvement' => 75, 
 			'2 - satisfactory' => 85, 
 			'3 - excellent' => 100];
-	$html = '<select name="proctor-grade" data-user="'.$user_id.'" data-assignment="'.$assignment_id.'">' ;
+	$html = '<select name="proctor-grade" data-user="'.$user_id.'" data-assignment="'.$assignment_id.'" data-comment="'.$assignment_comment.'">' ;
 		foreach ($scores as $key => $value) {
 			if ($value == $score ){
 				$selected = 'selected="selected"';
@@ -278,6 +291,7 @@ function selected_proctor_score($score, $user_id, $assignment_id){
 			//  <option value="100">3 - excellent</option>
 		}
 	$html .= '</select>';
+	$html .= '<input class="assignment-comment" type="text" name="comment" id="comment-' . $user_id . '" value="' . $assignment_comment . '">';
 	return $html;
 }
 
@@ -288,8 +302,9 @@ function update_proctor_grades(){
 	$user_id = $_POST['user_id'];
 	$assignment_id =  $_POST['assignment_id'];
 	$score =  $_POST['assignment_score'];
+	$comment = $_POST['assignment_comment'];
 	$db_score = array();
-	array_push($db_score, array('score'=>$score, 'name'=>'nothing', 'status'=>'', 'component'=>1));
+	array_push($db_score, array('score'=>$score, 'name'=>$comment, 'status'=>'', 'component'=>1));
 	$serialized = $db_score; //it appears that it's serializing it without me
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) { 
 	 	 update_user_meta($user_id, 'ld_gb_manual_grades_785_' . $assignment_id, $serialized);
