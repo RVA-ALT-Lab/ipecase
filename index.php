@@ -184,45 +184,49 @@ function find_key_value($array, $key, $val){
 
 
 function ipe_proctor_view(){
-	$html = '';
-	$group_members = alt_ipe_get_group_members_leader();
-	$proctor_scores = [];
-	$gradebook_contents = get_post_meta(785,'ld_gb_components', true);//all the gradebook info - associated w post ID which you can find via https://ipecase.org/VCU/wp-admin/edit.php?post_type=gradebook
-	$gradebook = maybe_unserialize($gradebook_contents);
-	$proctor_assignments = [];
-	foreach ($gradebook as $key => $assignment) {
-		$assignment_name = strtolower($assignment['name']);//make it lower case for match below
-		if (strpos($assignment_name, 'proctor') !== false ){
-			array_push($proctor_assignments, array($assignment['name'] => $assignment['id']));
+	if ( is_user_logged_in() ) {
+		$html = '<div id="success-notification"></div>';//place to set update alerts
+		$group_members = alt_ipe_get_group_members_leader();
+		$proctor_scores = [];
+		$gradebook_contents = get_post_meta(785,'ld_gb_components', true);//all the gradebook info - associated w post ID which you can find via https://ipecase.org/VCU/wp-admin/edit.php?post_type=gradebook
+		$gradebook = maybe_unserialize($gradebook_contents);
+		$proctor_assignments = [];
+		foreach ($gradebook as $key => $assignment) {
+			$assignment_name = strtolower($assignment['name']);//make it lower case for match below
+			if (strpos($assignment_name, 'proctor') !== false ){
+				array_push($proctor_assignments, array($assignment['name'] => $assignment['id']));
+			}
 		}
-	}
-	$html = '<div class="proctor-grades"><div class="empty-cell assignment-title assignment-cell"></div>';
-	foreach ($proctor_assignments as $key => $assignment) {
-		$html .= '<div class="column assignment-title">' . key($assignment) . '</div>';
-	}
-	foreach ($group_members as $key => $member) {
-		if (isset($group_members[$key-1]['group'])){
-			$check = $group_members[$key-1]['group'];
-		} else {
-			$check = 'foo';
-		}
-		if ($member['group'] !=  $check && $key != 0 ){
-			$html .= '<div class="cover"> <h2>'. $member['group'] .'</h2></div>';
-		}
-		$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) . '</div>';
-		$user_id = $member[key($member)];
+		$html .= '<div class="proctor-grades"><div class="empty-cell assignment-title assignment-cell"></div>';
 		foreach ($proctor_assignments as $key => $assignment) {
-			$assignment_id = $assignment[key($assignment)];
-			$score = return_assignment_score($user_id, $assignment_id);
-			$comment = return_assignment_comment($user_id, $assignment_id);     
-			$html .= '<div class="proctor-assignment assignment-cell">' . selected_proctor_score($score, $user_id, $assignment_id, $comment) . '</div>';
+			$html .= '<div class="column assignment-title">' . key($assignment) . '</div>';
 		}
-
-	}
+		foreach ($group_members as $key => $member) {
+			if (isset($group_members[$key-1]['group'])){
+				$check = $group_members[$key-1]['group'];
+			} else {
+				$check = 'foo';
+			}
+			if ($member['group'] !=  $check && $key != 0 ){
+				$html .= '<div class="cover"> <h2>'. $member['group'] .'</h2></div>';
+			}
+			$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) . '</div>';
+			$user_id = $member[key($member)];
+			foreach ($proctor_assignments as $key => $assignment) {
+				$assignment_id = $assignment[key($assignment)];
+				$score = return_assignment_score($user_id, $assignment_id);
+				$comment = return_assignment_comment($user_id, $assignment_id);     
+				$html .= '<div class="proctor-assignment assignment-cell">' . selected_proctor_score($score, $user_id, $assignment_id, $comment) . '</div>';
+			}
+		}
 	//grades are in wp_usermeta at patters like ld_gb_manual_grades_785_1 (785 being the gradebook) and 1 being the item
 	//print("<pre>".print_r($proctor_assignments,true)."</pre>");	
 	//print("<pre>".print_r($group_members,true)."</pre>");	
 	return $html;
+	} else {
+		return 'Please login.';
+	}
+	
 }
 add_shortcode( 'proctor', 'ipe_proctor_view' );
 
@@ -280,7 +284,7 @@ function selected_proctor_score($score, $user_id, $assignment_id, $assignment_co
 			'1 - needs improvement' => 75, 
 			'2 - satisfactory' => 85, 
 			'3 - excellent' => 100];
-	$html = '<select name="proctor-grade" data-user="'.$user_id.'" data-assignment="'.$assignment_id.'" data-comment="'.$assignment_comment.'">' ;
+	$html = '<select id="unique-'.$user_id. $assignment_id .'" name="proctor-grade" data-user="'.$user_id.'" data-assignment="'.$assignment_id.'" data-comment="'.$assignment_comment.'">' ;
 		foreach ($scores as $key => $value) {
 			if ($value == $score ){
 				$selected = 'selected="selected"';
