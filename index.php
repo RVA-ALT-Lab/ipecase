@@ -315,3 +315,52 @@ function update_proctor_grades(){
 	 	}
 	 	die();
 }
+
+
+//QUIZ CURVING
+
+// add_action("learndash_quiz_completed", function($data) {
+// //Called when quiz is completed
+// 	debug_to_console($data);
+// }, 5, 1);
+
+
+// function debug_to_console( $data ) {
+//     $output = $data;
+//     if ( is_array( $output ) )
+//         $output = implode( ',', $output);
+
+//     echo "<script>console.log( 'Debug Objects: " . $output . "' );</script>";
+// }
+
+
+function get_acf_curve_data($post_id, $user_displine){
+	// check if the repeater field has rows of data
+	if( have_rows('curve_details', $post_id) ):
+
+	 	// loop through the rows of data
+	    while ( have_rows('curve_details', $post_id) ) : the_row();
+	    	$discpline = get_sub_field('discipline_group', $post_id);
+	        $curve_value = get_sub_field('curve_value', $post_id);
+
+	    	if ($user_displine == $discipline){
+	        // display a sub field value	       
+	        var_dump($discpline);
+	        var_dump($curve_value);//change to function to increment grade by $curve_value
+	    }
+
+
+	    endwhile;
+
+	else :
+
+	    // no rows found
+
+	endif;
+
+}
+
+function get_user_discipline($user_id){
+	$discipline = get_user_meta($user_id, '_discipline', true);
+	return $discipline;
+}

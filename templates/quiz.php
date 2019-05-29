@@ -37,6 +37,11 @@
 $quiz_id = $quiz_settings['quiz_pro'];
 $group_members = alt_ipe_get_group_members();
 $user_ids = implode(', ', $group_members);
+$quiz_category = get_the_category($post->ID)[0]->name;//gets quiz category assuming there's only one -- not sure this is needed if we have acf fields
+echo $post->ID;
+
+get_acf_curve_data($post->ID);
+echo 'user discipline- ' . get_user_discipline($user_id);
 
 
 // $data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
