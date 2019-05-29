@@ -345,8 +345,8 @@ function get_acf_curve_data($post_id, $user_displine){
 
 	    	if ($user_displine == $discipline){
 	        // display a sub field value	       
-	        var_dump($discpline);
-	        var_dump($curve_value);//change to function to increment grade by $curve_value
+	        //var_dump($discpline);
+	        //var_dump($curve_value);//change to function to increment grade by $curve_value
 	    }
 
 
@@ -363,4 +363,15 @@ function get_acf_curve_data($post_id, $user_displine){
 function get_user_discipline($user_id){
 	$discipline = get_user_meta($user_id, '_discipline', true);
 	return $discipline;
+}
+
+function get_user_quiz_data($user_id){
+	$scores = get_user_meta($user_id, '_sfwd-quizzes', true);
+	return $scores;
+}
+
+function update_quiz_score($all_quizzes){
+	foreach ($all_quizzes as $quiz) {
+		print("<pre>".print_r($quiz['total_points'],true)."</pre>");
+	}
 }

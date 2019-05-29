@@ -41,8 +41,12 @@ $quiz_category = get_the_category($post->ID)[0]->name;//gets quiz category assum
 echo $post->ID;
 
 get_acf_curve_data($post->ID);
-echo 'user discipline- ' . get_user_discipline($user_id);
-
+//echo 'user discipline- ' . get_user_discipline($user_id);
+//var_dump($quiz_settings);
+//var_dump($post->ID);//seems like the quiz id would be $quiz_id but it's a lie, you want the post ID 
+$the_quizzes = get_user_quiz_data($user_id);
+print("<pre>".print_r($the_quizzes[0],true)."</pre>");
+var_dump(update_quiz_score($the_quizzes));
 
 // $data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
 // doing_math($data);
