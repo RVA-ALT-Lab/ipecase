@@ -192,8 +192,8 @@ function ipe_proctor_view(){
 		$gradebook = maybe_unserialize($gradebook_contents);
 		$proctor_assignments = [];
 		foreach ($gradebook as $key => $assignment) {
-			$assignment_name = strtolower($assignment['name']);//make it lower case for match below
-			if (strpos($assignment_name, 'proctor') !== false ){
+			$assignment_name = strtolower($assignment['name']);//make it lower case for match below			
+			if (strpos($assignment_name, 'preceptor') !== false ){				
 				array_push($proctor_assignments, array($assignment['name'] => $assignment['id']));
 			}
 		}
