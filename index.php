@@ -334,19 +334,20 @@ function update_proctor_grades(){
 // }
 
 
-function get_acf_curve_data($post_id, $user_displine){
+function get_acf_curve_data($post_id, $user_discipline, $all_quizzes){
 	// check if the repeater field has rows of data
 	if( have_rows('curve_details', $post_id) ):
 
 	 	// loop through the rows of data
 	    while ( have_rows('curve_details', $post_id) ) : the_row();
-	    	$discpline = get_sub_field('discipline_group', $post_id);
+	    	$discipline = get_sub_field('discipline_group', $post_id);
 	        $curve_value = get_sub_field('curve_value', $post_id);
 
-	    	if ($user_displine == $discipline){
+	    	if ($user_discipline == $discipline){
 	        // display a sub field value	       
-	        //var_dump($discpline);
-	        //var_dump($curve_value);//change to function to increment grade by $curve_value
+	        //var_dump($discipline);
+	        //var_dump($curve_value);//change to function to increment grade by $curve_value	    		
+	    		print("<pre>".print_r(update_quiz_score($all_quizzes, $curve_value),true)."</pre>");
 	    }
 
 
@@ -370,8 +371,13 @@ function get_user_quiz_data($user_id){
 	return $scores;
 }
 
-function update_quiz_score($all_quizzes){
+function update_quiz_score($all_quizzes, $curve_points){
+	var_dump($all_quizzes);
 	foreach ($all_quizzes as $quiz) {
-		print("<pre>".print_r($quiz['total_points'],true)."</pre>");
+		$current_points = $quiz['total_points'];
+		var_dump($current_points);
+		$new_points = $current_points + $curve_points;
+		var_dump($new_points);
+		return $new_points;
 	}
 }
