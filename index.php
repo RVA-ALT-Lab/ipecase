@@ -199,7 +199,7 @@ function ipe_proctor_view(){
 		}
 		$html .= '<div class="proctor-grades"><div class="empty-cell assignment-title assignment-cell"></div>';
 		foreach ($proctor_assignments as $key => $assignment) {
-			$html .= '<div class="column assignment-title">' . key($assignment) . '</div>';
+			$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $group_members[0]['group']) . '">' . key($assignment) . '</a></div>';
 		}
 		foreach ($group_members as $key => $member) {
 			if (isset($group_members[$key-1]['group'])){
@@ -208,7 +208,10 @@ function ipe_proctor_view(){
 				$check = 'foo';
 			}
 			if ($member['group'] !=  $check && $key != 0 ){
-				$html .= '<div class="cover"> <h2>'. $member['group'] .'</h2></div>';
+				$html .= '<div class="cover"> <h2>'. $member['group'] .'</h2></div><div class="empty-cell assignment-title assignment-cell"></div>';
+				foreach ($proctor_assignments as $key => $assignment) {
+					$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $member['group']) . '">' . key($assignment) . '</a></div>';
+				}
 			}
 			$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) . '</div>';
 			$user_id = $member[key($member)];
@@ -243,6 +246,12 @@ function return_assignment_comment($user_id, $assignment_id){
 		return $assignment[0]['name'];
 	}
 }
+
+function etherpad_assignment_link($assignment_name,$group_id){
+	$name = substr($assignment_name, 0,6);
+	return 'archives/etherpad/'.sanitize_title($name).'?group='.$group_id;
+}
+
 
 //GET GRP ID FROM LEARN DASH GROUPS which is in the metadata for the logged in user
 function alt_ipe_get_group_members_leader(){
