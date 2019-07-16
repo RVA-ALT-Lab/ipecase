@@ -325,22 +325,10 @@ function update_proctor_grades(){
 	 	die();
 }
 
+/*
+//QUIZ CURVING --------------------------
+*/
 
-//QUIZ CURVING
-
-// add_action("learndash_quiz_completed", function($data) {
-// //Called when quiz is completed
-// 	debug_to_console($data);
-// }, 5, 1);
-
-
-// function debug_to_console( $data ) {
-//     $output = $data;
-//     if ( is_array( $output ) )
-//         $output = implode( ',', $output);
-
-//     echo "<script>console.log( 'Debug Objects: " . $output . "' );</script>";
-// }
 
 
 function get_acf_curve_data($post_id, $user_discipline, $all_quizzes){
@@ -351,13 +339,12 @@ function get_acf_curve_data($post_id, $user_discipline, $all_quizzes){
 	    while ( have_rows('curve_details', $post_id) ) : the_row();
 	    	$discipline = get_sub_field('discipline_group', $post_id);
 	        $curve_value = get_sub_field('curve_value', $post_id);
-
-	    	if ($user_discipline == $discipline){
-	        // display a sub field value	       
-	        //var_dump($discipline);
-	        //var_dump($curve_value);//change to function to increment grade by $curve_value	    		
-	    		print("<pre>".print_r(update_quiz_score($all_quizzes, $curve_value),true)."</pre>");
-	    }
+	      
+	    	if ($user_discipline == $discipline){	       
+	    		return (int)$curve_value;
+	    	} else {
+	    		return 0;
+	    	}
 
 
 	    endwhile;
@@ -365,6 +352,7 @@ function get_acf_curve_data($post_id, $user_discipline, $all_quizzes){
 	else :
 
 	    // no rows found
+	    return 0;
 
 	endif;
 
@@ -376,17 +364,34 @@ function get_user_discipline($user_id){
 }
 
 function get_user_quiz_data($user_id){
-	$scores = get_user_meta($user_id, '_sfwd-quizzes', true);
+	$scores = maybe_unserialize(get_user_meta($user_id, '_sfwd-quizzes', true));
 	return $scores;
 }
 
-function update_quiz_score($all_quizzes, $curve_points){
-	var_dump($all_quizzes);
-	foreach ($all_quizzes as $quiz) {
-		$current_points = $quiz['total_points'];
-		var_dump($current_points);
-		$new_points = $current_points + $curve_points;
-		var_dump($new_points);
-		return $new_points;
+function average_quiz_points($points, $total_points){
+    if ($points>0){
+        return (int)$points/(int)$total_points;
+    } else {
+        return 0;
+    }
+}
+
+
+
+function update_quiz_score($user_id, $quiz_id, $curve){
+	$all_quizzes = get_user_quiz_data($user_id);
+	print("<pre>".print_r($all_quizzes,true)."</pre>"); 
+	foreach ($all_quizzes as &$quiz) {
+
+		if ((int)$quiz['pro_quizid'] === (int)$quiz_id){ // && !array_key_exists("curved",$quiz)
+			
+			$quiz['curved'] = $curve;//add metafield that lets you know how much it was curved by
+        	$quiz['og_points'] =  $quiz['points']; //original score
+			$quiz['points'] = $quiz['points'] + $curve;
+			$quiz['percentage'] = average_quiz_points($quiz['points'], $quiz['total_points']);
+        	//print("<pre>".print_r($all_quizzes,true)."</pre>"); 
+        	update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes);
+		}
+		
 	}
 }

@@ -35,25 +35,23 @@
  */
 
 $quiz_id = $quiz_settings['quiz_pro'];
+//echo 'quiz id = ' .$quiz_id.'<br/>';
+//echo 'post id = ' .$post->ID.'<br/>';
 $group_members = alt_ipe_get_group_members();
 $user_ids = implode(', ', $group_members);
 $quiz_category = get_the_category($post->ID)[0]->name;//gets quiz category assuming there's only one -- not sure this is needed if we have acf fields
-echo 'post id - ' . $post->ID . '<br/>';
+
 $user_discipline = get_user_discipline($user_id);
 $the_quizzes = get_user_quiz_data($user_id);
 
 
 $curve = get_acf_curve_data($post->ID, $user_discipline, $the_quizzes);
-echo 'user discipline - ' . $user_discipline . '<br/>';
-var_dump($curve);
+//echo 'user discipline - ' . $user_discipline . '<br/>';
+//echo 'user curve - ' . $curve;
 
-//var_dump($quiz_settings);
-//var_dump($post->ID);//seems like the quiz id would be $quiz_id but it's a lie, you want the post ID 
 
-//update_quiz_score($the_quizzes));
+update_quiz_score($user_id, $quiz_id, $curve);
 
-// $data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
-// doing_math($data);
 
 
 if ( ! empty( $lesson_progression_enabled ) ) {
