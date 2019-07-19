@@ -287,12 +287,11 @@ function alt_ipe_get_group_members_leader(){
 // }
 
 function selected_proctor_score($score, $user_id, $assignment_id, $assignment_comment){
-	$scores = [
-			'unscored'=>'unscored',
+	$scores = array('unscored'=>'unscored',
 			'0 - unsatisfactory' => 50, 
 			'1 - needs improvement' => 75, 
 			'2 - satisfactory' => 85, 
-			'3 - excellent' => 100];
+			'3 - excellent' => 100);
 	$html = '<select id="unique-'.$user_id. $assignment_id .'" name="proctor-grade" data-user="'.$user_id.'" data-assignment="'.$assignment_id.'" data-comment="'.$assignment_comment.'">' ;
 		foreach ($scores as $key => $value) {
 			if ($value == $score ){
@@ -330,21 +329,47 @@ function update_proctor_grades(){
 */
 
 
+//THE HOOK THAT RUNS AFTER QUIZ COMPLETION
+add_action("learndash_quiz_completed", function($data) {
+//Called when quiz is completed
+	
+	$user_id = get_current_user_id();
+	$quiz_id = $data['pro_quizid'];
+	$curve = return_curved_quiz($user_id, $quiz_id);
+	update_quiz_score($user_id, $quiz_id, $curve);	
+	$quiz_info = return_curved_quiz($user_id, $quiz_id);
+	$refer = wp_get_referer();
+	//$quiz_id = 'quiz id = '.  $data['pro_quizid'];
+	// $content = "<pre>".print_r($data,true)."</pre>";
+	// $my_post = array(
+ //    'post_title'    => 'happened ' . $quiz_info,
+ //    'post_content'  => $content . 'current user = ' . get_current_user_id(),
+ //    'post_status'   => 'publish',
+ //    'post_author'   => 1,    
+	// );
+	 
+	// // Insert the post into the database.
+	// wp_insert_post( $my_post );
+	
+}, 5, 1);
 
 function get_acf_curve_data($post_id, $user_discipline, $all_quizzes){
 	// check if the repeater field has rows of data
-	if( have_rows('curve_details', $post_id) ):
+	$count = count(get_field('field_5ced7856feaa7', $post_id));
 
+	if( have_rows('field_5ced7856feaa7', $post_id) ):		
 	 	// loop through the rows of data
-	    while ( have_rows('curve_details', $post_id) ) : the_row();
-	    	$discipline = get_sub_field('discipline_group', $post_id);
-	        $curve_value = get_sub_field('curve_value', $post_id);
-	      
-	    	if ($user_discipline == $discipline){	       
+	    while ( have_rows('field_5ced7856feaa7', $post_id) ) : the_row();
+
+	    	$discipline = get_sub_field('field_5ced7865feaa8', $post_id);
+	        $curve_value = get_sub_field('field_5ced78cdfeaa9', $post_id);
+	      	
+	    	if ($user_discipline === $discipline || $user_discipline == 'All'){	       //|| $user_discipline == 'All'
 	    		return (int)$curve_value;
-	    	} else {
-	    		return 0;
-	    	}
+	    	} 
+	    	// else {
+	    	// 	return 0;
+	    	// }
 
 
 	    endwhile;
@@ -377,21 +402,37 @@ function average_quiz_points($points, $total_points){
 }
 
 
-
 function update_quiz_score($user_id, $quiz_id, $curve){
 	$all_quizzes = get_user_quiz_data($user_id);
 	print("<pre>".print_r($all_quizzes,true)."</pre>"); 
 	foreach ($all_quizzes as &$quiz) {
 
-		if ((int)$quiz['pro_quizid'] === (int)$quiz_id){ // && !array_key_exists("curved",$quiz)
+		if ((int)$quiz['pro_quizid'] === (int)$quiz_id && !array_key_exists("curved",$quiz)){ // && !array_key_exists("curved",$quiz)
 			
 			$quiz['curved'] = $curve;//add metafield that lets you know how much it was curved by
         	$quiz['og_points'] =  $quiz['points']; //original score
 			$quiz['points'] = $quiz['points'] + $curve;
 			$quiz['percentage'] = average_quiz_points($quiz['points'], $quiz['total_points']);
-        	//print("<pre>".print_r($all_quizzes,true)."</pre>"); 
+        	print("<pre>".print_r($all_quizzes,true)."</pre>"); 
         	update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes);
 		}
 		
 	}
+}
+
+function return_curved_quiz($user_id, $quiz_id){
+	$all_quizzes = get_user_quiz_data($user_id);
+
+	foreach ($all_quizzes as $quiz) {		
+		if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
+			$new_score = $quiz['points'];
+		if($quiz['curved']){
+			$curve = $quiz['curved'];	
+		} else {
+			$curve = 0;
+		}
+
+		return '<h2>Your final score is a ' . $new_score . ' which is curved by ' . $curve . ' points.</h2>';
+	}
+}
 }
