@@ -428,16 +428,27 @@ function update_quiz_score($user_id, $quiz_id, $curve){
 function return_curved_quiz($user_id, $quiz_id){
 	$all_quizzes = get_user_quiz_data($user_id);
 
-	foreach ($all_quizzes as $quiz) {		
-		if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
-			$new_score = $quiz['points'];
-		if($quiz['curved']){
-			$curve = $quiz['curved'];	
-		} else {
-			$curve = 0;
+		foreach ($all_quizzes as $quiz) {		
+			if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
+				$new_score = $quiz['points'];
+			if($quiz['curved']){
+				$curve = $quiz['curved'];	
+			} else {
+				$curve = 0;
+			}
+			return  $curve;
 		}
-		 print("<pre>".print_r($all_quizzes,true)."</pre>"); 
-		return  $curve;
 	}
 }
+
+function return_score_percentage($user_id, $quiz_id){
+	$all_quizzes = get_user_quiz_data($user_id);
+	foreach ($all_quizzes as $quiz) {	
+			if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
+				$new_score = $quiz['percentage'];
+				$pretty_percent = number_format( $new_score * 100, 0 ) . '%';
+				return  $pretty_percent;
+		}
+	}
+
 }
