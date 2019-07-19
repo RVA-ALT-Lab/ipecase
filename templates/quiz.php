@@ -45,8 +45,8 @@ $user_discipline = get_user_discipline($user_id);
 $the_quizzes = get_user_quiz_data($user_id);
 
 
-//$curve = get_acf_curve_data($post->ID, $user_discipline, $the_quizzes);
-
+$curve = get_acf_curve_data($post->ID, $user_discipline);
+var_dump((int)$curve);
 
 
 if ( ! empty( $lesson_progression_enabled ) ) {
@@ -92,7 +92,7 @@ if ( ! empty( $lesson_progression_enabled ) ) {
     if ( $attempts_left ) {
         echo $quiz_content;
     } else { 
-    	echo return_curved_quiz($user_id, $quiz_id);  
+    	echo '<h2>Your quiz was curved by ' . return_curved_quiz($user_id, $quiz_id) . ' points.';  
     	echo '<h2>Group Data</h2>';
     	echo '<p>This shows how your group has done in aggregate.</p>';
     	$data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);

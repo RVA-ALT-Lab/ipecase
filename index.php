@@ -333,39 +333,45 @@ function update_proctor_grades(){
 add_action("learndash_quiz_completed", function($data) {
 //Called when quiz is completed
 	
-	$user_id = get_current_user_id();
-	$quiz_id = $data['pro_quizid'];
-	$curve = return_curved_quiz($user_id, $quiz_id);
-	update_quiz_score($user_id, $quiz_id, $curve);	
-	$quiz_info = return_curved_quiz($user_id, $quiz_id);
-	$refer = wp_get_referer();
-	//$quiz_id = 'quiz id = '.  $data['pro_quizid'];
-	// $content = "<pre>".print_r($data,true)."</pre>";
+	$user_id = get_current_user_id();//get user
+	$quiz_id = $data['pro_quizid'];//get quiz
+	$id = $data['quiz']->ID;//og post id to get acf data - this differs from the quiz id
+	$user_discipline = get_user_discipline($user_id);//get discipline
+	$all_quizzes = get_user_quiz_data($user_id);//get all quizzes
+
+	$curve = get_acf_curve_data($id, $user_discipline);//get curve value
+	update_quiz_score($user_id, $quiz_id, $curve);	//update records
+	$refer = wp_get_referer();//MAYBE DO THIS FOR REDIRECT LATER . . . . . 
+	$quiz_id = 'quiz id = '.  $data['pro_quizid'];
+	$content = ' disc- ' . $user_discipline . ' curve- ' . $curve . "<pre>".print_r($data['quiz']->ID,true)."</pre>";
+	//$content = "<pre>".print_r($data,true)."</pre>";
 	// $my_post = array(
- //    'post_title'    => 'happened ' . $quiz_info,
- //    'post_content'  => $content . 'current user = ' . get_current_user_id(),
+ //    'post_title'    => 'disc = ' . get_user_discipline($user_id),
+ //    'post_content'  => $content,
  //    'post_status'   => 'publish',
  //    'post_author'   => 1,    
 	// );
 	 
 	// // Insert the post into the database.
 	// wp_insert_post( $my_post );
+	wp_redirect( $refer ); //redirect to page
+	exit;
 	
 }, 5, 1);
 
-function get_acf_curve_data($post_id, $user_discipline, $all_quizzes){
+function get_acf_curve_data($post_id, $user_discipline){
 	// check if the repeater field has rows of data
-	$count = count(get_field('field_5ced7856feaa7', $post_id));
-
-	if( have_rows('field_5ced7856feaa7', $post_id) ):		
+	//$count = count(get_field('field_5ced7856feaa7', $post_id));
+	if( have_rows('curve_details', $post_id) ):		
 	 	// loop through the rows of data
-	    while ( have_rows('field_5ced7856feaa7', $post_id) ) : the_row();
+	    while ( have_rows('curve_details', $post_id) ) : the_row();
 
-	    	$discipline = get_sub_field('field_5ced7865feaa8', $post_id);
-	        $curve_value = get_sub_field('field_5ced78cdfeaa9', $post_id);
+	    	$discipline = get_sub_field('discipline_group');
+	        $curve_value = get_sub_field('curve_value');
 	      	
-	    	if ($user_discipline === $discipline || $user_discipline == 'All'){	       //|| $user_discipline == 'All'
-	    		return (int)$curve_value;
+	    	if ($user_discipline === $discipline){	       //|| $user_discipline == 'All'
+	    	    //var_dump($curve_value);
+	    		return $curve_value;
 	    	} 
 	    	// else {
 	    	// 	return 0;
@@ -404,16 +410,15 @@ function average_quiz_points($points, $total_points){
 
 function update_quiz_score($user_id, $quiz_id, $curve){
 	$all_quizzes = get_user_quiz_data($user_id);
-	print("<pre>".print_r($all_quizzes,true)."</pre>"); 
+	//print("<pre>".print_r($all_quizzes,true)."</pre>"); 
 	foreach ($all_quizzes as &$quiz) {
 
-		if ((int)$quiz['pro_quizid'] === (int)$quiz_id && !array_key_exists("curved",$quiz)){ // && !array_key_exists("curved",$quiz)
+		if ((int)$quiz['pro_quizid'] === (int)$quiz_id){ // && !array_key_exists("curved",$quiz)
 			
 			$quiz['curved'] = $curve;//add metafield that lets you know how much it was curved by
-        	$quiz['og_points'] =  $quiz['points']; //original score
-			$quiz['points'] = $quiz['points'] + $curve;
+        	$quiz['og_points'] =  (int)$quiz['points']; //original score
+			$quiz['points'] = (int)$quiz['points'] + (int)$curve;//new score with curve added
 			$quiz['percentage'] = average_quiz_points($quiz['points'], $quiz['total_points']);
-        	print("<pre>".print_r($all_quizzes,true)."</pre>"); 
         	update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes);
 		}
 		
@@ -431,8 +436,8 @@ function return_curved_quiz($user_id, $quiz_id){
 		} else {
 			$curve = 0;
 		}
-
-		return '<h2>Your final score is a ' . $new_score . ' which is curved by ' . $curve . ' points.</h2>';
+		 print("<pre>".print_r($all_quizzes,true)."</pre>"); 
+		return  $curve;
 	}
 }
 }

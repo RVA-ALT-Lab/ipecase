@@ -1,8 +1,8 @@
 function updateProctorScores(){
-	console.log(this.value);
-	console.log(this.dataset.user);
-	console.log(this.dataset.assignment);
-	console.log(this.dataset.comment);
+	// console.log(this.value);
+	// console.log(this.dataset.user);
+	// console.log(this.dataset.assignment);
+	// console.log(this.dataset.comment);
 	const notification = document.getElementById('success-notification');
 	var score = this.value;
 	var assignment_id = this.dataset.assignment;
@@ -29,13 +29,15 @@ jQuery( 'select' ).change(updateProctorScores)
 
 jQuery("#updateit").click(updateAll);
 
-let commentBoxes = document.querySelectorAll('input')
-commentBoxes.forEach(function(commentBox){
-	commentBox.addEventListener('input', function(evt){
-    console.log(this.value)
-    console.log(this.parentNode.childNodes[0].setAttribute('data-comment', this.value))
-  })
-})
+if(document.getElementById('updateit')){
+	let commentBoxes = document.querySelectorAll('input')
+	commentBoxes.forEach(function(commentBox){
+		commentBox.addEventListener('input', function(evt){
+	    console.log(this.value);
+	    this.parentNode.childNodes[0].setAttribute('data-comment', this.value);
+	  })
+	})
+}
 
 
 function updateAll(){
