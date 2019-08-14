@@ -342,8 +342,10 @@ add_action("learndash_quiz_completed", function($data) {
 	$curve = get_acf_curve_data($id, $user_discipline);//get curve value
 	update_quiz_score($user_id, $quiz_id, $curve);	//update records
 	$refer = wp_get_referer();//MAYBE DO THIS FOR REDIRECT LATER . . . . . 
+	//REMOVE FOR PRODUCTION
 	$quiz_id = 'quiz id = '.  $data['pro_quizid'];
 	$content = ' disc- ' . $user_discipline . ' curve- ' . $curve . "<pre>".print_r($data['quiz']->ID,true)."</pre>";
+	//END REMOVE
 	//$content = "<pre>".print_r($data,true)."</pre>";
 	// $my_post = array(
  //    'post_title'    => 'disc = ' . get_user_discipline($user_id),
@@ -359,6 +361,10 @@ add_action("learndash_quiz_completed", function($data) {
 	
 }, 5, 1);
 
+
+//CURVE STUFF
+
+//get CURVE AMOUNT
 function get_acf_curve_data($post_id, $user_discipline){
 	// check if the repeater field has rows of data
 	//$count = count(get_field('field_5ced7856feaa7', $post_id));
@@ -389,16 +395,19 @@ function get_acf_curve_data($post_id, $user_discipline){
 
 }
 
+//get user discipline 
 function get_user_discipline($user_id){
 	$discipline = get_user_meta($user_id, '_discipline', true);
 	return $discipline;
 }
 
+//get quiz scores from user meta
 function get_user_quiz_data($user_id){
 	$scores = maybe_unserialize(get_user_meta($user_id, '_sfwd-quizzes', true));
 	return $scores;
 }
 
+//average the quiz
 function average_quiz_points($points, $total_points){
     if ($points>0){
         return (int)$points/(int)$total_points;
@@ -407,7 +416,7 @@ function average_quiz_points($points, $total_points){
     }
 }
 
-
+//update quiz score in usermeta with curve score
 function update_quiz_score($user_id, $quiz_id, $curve){
 	$all_quizzes = get_user_quiz_data($user_id);
 	//print("<pre>".print_r($all_quizzes,true)."</pre>"); 
@@ -418,13 +427,14 @@ function update_quiz_score($user_id, $quiz_id, $curve){
 			$quiz['curved'] = $curve;//add metafield that lets you know how much it was curved by
         	$quiz['og_points'] =  (int)$quiz['points']; //original score
 			$quiz['points'] = (int)$quiz['points'] + (int)$curve;//new score with curve added
-			$quiz['percentage'] = average_quiz_points($quiz['points'], $quiz['total_points']);
+			$quiz['percentage'] = average_quiz_points($quiz['points']*100, $quiz['total_points']);
         	update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes);
 		}
 		
 	}
 }
 
+//to show quiz curve
 function return_curved_quiz($user_id, $quiz_id){
 	$all_quizzes = get_user_quiz_data($user_id);
 
@@ -441,14 +451,27 @@ function return_curved_quiz($user_id, $quiz_id){
 	}
 }
 
+
+//show curve score 
 function return_score_percentage($user_id, $quiz_id){
 	$all_quizzes = get_user_quiz_data($user_id);
 	foreach ($all_quizzes as $quiz) {	
 			if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
 				$new_score = $quiz['percentage'];
-				$pretty_percent = number_format( $new_score * 100, 0 ) . '%';
-				return  $pretty_percent;
+				$pretty_percent = number_format( $new_score + .5, 0 ) . '%';
+				return $pretty_percent;
 		}
 	}
 
+}
+//GROUP QUIZ 
+function group_quiz_test(){
+	global $post;
+	$all_categories = get_the_category($post->ID);
+	$group = $all_categories[0]->slug;
+	if ($group === 'group') {
+		return 'congratulations it is a group';
+	} else {
+		return 'not a group';
+	}
 }
