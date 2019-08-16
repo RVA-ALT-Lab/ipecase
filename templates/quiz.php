@@ -34,23 +34,26 @@
  * @package LearnDash\Quiz
  */
 
-$taken_quiz = get_user_quiz_data($user_id);
 
 //TESTING - remove for production
-echo "<pre>".print_r($taken_quiz,true)."</pre>";
+//echo "<pre>".print_r($taken_quiz,true)."</pre>";
 
 echo "<pre>".print_r($quiz_settings,true)."</pre>";
+//quiz settings has course, lesson, quiz_pro as pro_quizid
 
 
-echo group_quiz_test();
-//echo 'quiz id = ' .$quiz_id.'<br/>';
-//echo 'post id = ' .$post->ID.'<br/>';
+// echo 'quiz id = ' .$quiz_id.'<br/>';
+// echo 'post id = ' .$post->ID.'<br/>';
+//same
 
 //END TESTING now!!!!!
 
 $group_members = alt_ipe_get_group_members();
 $user_ids = implode(', ', $group_members);
 $quiz_category = get_the_category($post->ID)[0]->name;//gets quiz category assuming there's only one -- not sure this is needed if we have acf fields
+
+
+echo 'group test = ' . group_quiz_test($post->ID);
 
 $user_discipline = get_user_discipline($user_id);
 $the_quizzes = get_user_quiz_data($user_id);
@@ -103,7 +106,9 @@ if ( ! empty( $lesson_progression_enabled ) ) {
     if ( $attempts_left ) {
         echo $quiz_content;
     } else { 
-    	echo '<h2>Your quiz was curved by ' . return_curved_quiz($user_id, $quiz_id) . ' points. Your total score is ' . return_score_percentage($user_id, $quiz_id);  
+    	if(return_curved_quiz($user_id, $quiz_id) >0 ){
+	    	echo '<h2>Your quiz was curved by ' . return_curved_quiz($user_id, $quiz_id) . ' points. Your total score is ' . return_score_percentage($user_id, $quiz_id);  
+	    }
     	echo '<h2>Group Data</h2>';
     	echo '<p>This shows how your group has done in aggregate.</p>';
     	$data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);

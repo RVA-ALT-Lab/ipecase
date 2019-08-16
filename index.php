@@ -338,26 +338,44 @@ add_action("learndash_quiz_completed", function($data) {
 	$id = $data['quiz']->ID;//og post id to get acf data - this differs from the quiz id
 	$user_discipline = get_user_discipline($user_id);//get discipline
 	$all_quizzes = get_user_quiz_data($user_id);//get all quizzes
+	$user_ids = alt_ipe_get_group_members();
 
-	$curve = get_acf_curve_data($id, $user_discipline);//get curve value
-	update_quiz_score($user_id, $quiz_id, $curve);	//update records
-	$refer = wp_get_referer();//MAYBE DO THIS FOR REDIRECT LATER . . . . . 
-	//REMOVE FOR PRODUCTION
-	$quiz_id = 'quiz id = '.  $data['pro_quizid'];
-	$content = ' disc- ' . $user_discipline . ' curve- ' . $curve . "<pre>".print_r($data['quiz']->ID,true)."</pre>";
-	//END REMOVE
-	//$content = "<pre>".print_r($data,true)."</pre>";
-	// $my_post = array(
- //    'post_title'    => 'disc = ' . get_user_discipline($user_id),
- //    'post_content'  => $content,
- //    'post_status'   => 'publish',
- //    'post_author'   => 1,    
-	// );
-	 
-	// // Insert the post into the database.
-	// wp_insert_post( $my_post );
-	wp_redirect( $refer ); //redirect to page
-	exit;
+	if (group_quiz_test($id) === FALSE){
+		if(get_acf_curve_data($id, $user_discipline)){
+			$curve = get_acf_curve_data($id, $user_discipline);//get curve value
+			update_quiz_score($user_id, $quiz_id, $curve);	//update records
+			$refer = wp_get_referer();//MAYBE DO THIS FOR REDIRECT LATER . . . . . 
+			//REMOVE FOR PRODUCTION
+			$quiz_id = 'quiz id = '.  $data['pro_quizid'];
+				// $content = ' disc- ' . $user_discipline . ' curve- ' . $curve . "<pre>".print_r($data['quiz']->ID,true)."</pre>";
+				// $content = "<pre>".print_r($data,true)."</pre>";
+				// $my_post = array(
+			 //    'post_title'    => 'disc = ' . get_user_discipline($user_id),
+			 //    'post_content'  => $content,
+			 //    'post_status'   => 'publish',
+			 //    'post_author'   => 1,    
+				// );
+				 
+				// // Insert the post into the database.
+				// wp_insert_post( $my_post );
+		//END REMOVE
+			wp_redirect( $refer ); //redirect to page
+			exit;
+		}
+	} else if (group_quiz_test($id) === TRUE){		
+		// $content = "<pre>".print_r($data,true)."</pre>";
+		// 	$my_post = array(
+		//     'post_title'    => 'group test- ' . group_quiz_test($id) ,
+		//     'post_content'  => $content,
+		//     'post_status'   => 'publish',
+		//     'post_author'   => 1,    
+		// 	);
+			 
+		// 	// Insert the post into the database.
+		// 	wp_insert_post( $my_post );
+
+			assign_group_scores( $data, $quiz_id, $user_id);
+	}
 	
 }, 5, 1);
 
@@ -446,9 +464,11 @@ function return_curved_quiz($user_id, $quiz_id){
 			} else {
 				$curve = 0;
 			}
-			return  $curve;
+			
 		}
+
 	}
+	return  $curve;
 }
 
 
@@ -465,13 +485,46 @@ function return_score_percentage($user_id, $quiz_id){
 
 }
 //GROUP QUIZ 
-function group_quiz_test(){
-	global $post;
-	$all_categories = get_the_category($post->ID);
+function group_quiz_test($post_id){	
+	$all_categories = get_the_category($post_id);
 	$group = $all_categories[0]->slug;
 	if ($group === 'group') {
-		return 'congratulations it is a group';
+		return true;
 	} else {
-		return 'not a group';
+		return false;
 	}
+}
+
+
+//$score, $course, $lesson, $quiz_id
+function assign_group_scores($data, $quiz_id, $user_id){
+	$user_ids = alt_ipe_get_group_members();
+	if(get_user_quiz_data($user_id)){//has quiz data
+		$all_quizzes = get_user_quiz_data($user_id);//get the submitter quiz data
+		foreach ($all_quizzes as &$quiz) {
+				if ((int)$quiz['pro_quizid'] === (int)$quiz_id){  //match found for source to copy to other users
+		  
+				$quiz['group_score'] = 'scored as group';//flag as scored by group process
+				
+				$new_group_score = $quiz;
+
+				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); 
+				}			
+			} 	
+		}
+	//apply to other people in the group	
+	$clean_user_ids = not_me($user_ids, $user_id);//remove quiz taker from this loop
+	foreach ($clean_user_ids as $group_user_id){	
+	   $other_users_quizzes = get_user_quiz_data($group_user_id);	
+       array_push($other_users_quizzes, $new_group_score);
+       update_user_meta( $group_user_id, '_sfwd-quizzes', $all_quizzes);
+	}
+}
+
+function not_me($user_ids, $user_id){
+    if (($key = array_search($user_id, $user_ids)) !== false) {
+        unset($user_ids[$key]);
+    }
+    return $user_ids;
+
 }
