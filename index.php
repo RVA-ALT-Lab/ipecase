@@ -1,4 +1,4 @@
-<?php 
+<?php
 /*
 Plugin Name: ALT Lab IPE CASE SPECIAL THINGS
 Plugin URI:  https://github.com/
@@ -18,11 +18,11 @@ defined( 'ABSPATH' ) or die( 'No script kiddies please!' );
 
 add_action('wp_enqueue_scripts', 'alt_ipe_load_scripts');
 
-function alt_ipe_load_scripts() {                           
+function alt_ipe_load_scripts() {
     $deps = array();
-    $version= '1.0'; 
-    $in_footer = true;    
-    wp_enqueue_script('ipe-main-js', plugin_dir_url( __FILE__) . 'js/ipe-main.js', $deps, $version, $in_footer); 
+    $version= '1.0';
+    $in_footer = true;
+    wp_enqueue_script('ipe-main-js', plugin_dir_url( __FILE__) . 'js/ipe-main.js', $deps, $version, $in_footer);
     wp_enqueue_style( 'ipe-main-css', plugin_dir_url( __FILE__) . 'css/ipe-main.css');
     wp_localize_script( 'ipe-main-js', 'proctor_score', array(
 		'ajax_url' => admin_url( 'admin-ajax.php' )
@@ -43,7 +43,7 @@ function alt_ipe_replacement_learndash_templates( $filepath, $name, $args, $echo
    $filepath = plugin_dir_path(__FILE__ ) . 'templates/quiz.php';
  }
  return $filepath;
- 
+
 }
 add_filter('learndash_template','alt_ipe_replacement_learndash_templates', 90, 5);
 
@@ -63,7 +63,7 @@ function alt_ipe_get_group_members(){
 	  if("learndash_group_users_" == substr($key,0,22)){ //such a mess to do partial match
 	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
 		  }
-		}		
+		}
 	return alt_ipd_users_to_ids($users);//get user ids with matching groups
 	}
 //alt_ipd_get_stat_refs($quiz_settings['quiz_pro'], alt_ipe_get_group_members())
@@ -78,8 +78,8 @@ function alt_ipd_get_group_users($group_id){
 	$args = array(
 	'meta_key'     => 'learndash_group_users_' . $group_id,
 	'meta_value'   => $group_id,
-	
- ); 
+
+ );
 	$the_group = get_users( $args );
 	return $the_group;
 }
@@ -120,10 +120,10 @@ function doing_math($data){
 			    array_push($answer_text, array($data->getAnswer()=>(int)$choice_count));
 			}
 		foreach ($answer_text as $key => $data)
-			{				
+			{
 				$choice_key = key($data);
-				$choice_value = $data[$choice_key];				
-				update_question_data($a, $key, $choice_key, $choice_value, $a_value);//RUNS FOR DUPLICATE IDS ONLY 
+				$choice_value = $data[$choice_key];
+				update_question_data($a, $key, $choice_key, $choice_value, $a_value);//RUNS FOR DUPLICATE IDS ONLY
 			}
 
 		} else {
@@ -139,14 +139,14 @@ function doing_math($data){
 			array_push($a, array("question_id"=> (int)$quiz->question_id,array("question_title"=>$quiz->title,"question"=>$quiz->question), $answer_text));
 		}
 	}
-	//print("<pre>".print_r($a,true)."</pre>");	
-	return $a;	
+	//print("<pre>".print_r($a,true)."</pre>");
+	return $a;
 }
 
 
 function update_question_data(&$a, $key, $choice_key, $choice_value, $a_value){
 	$response = &$a[$a_value][1][$key];
-	$response[$choice_key] =  (int)$response[$choice_key] + (int)$choice_value;			
+	$response[$choice_key] =  (int)$response[$choice_key] + (int)$choice_value;
 }
 
 function group_responses_printer($data){
@@ -192,14 +192,14 @@ function ipe_proctor_view(){
 		$gradebook = maybe_unserialize($gradebook_contents);
 		$proctor_assignments = [];
 		foreach ($gradebook as $key => $assignment) {
-			$assignment_name = strtolower($assignment['name']);//make it lower case for match below			
-			if (strpos($assignment_name, 'preceptor') !== false ){				
+			$assignment_name = strtolower($assignment['name']);//make it lower case for match below
+			if (strpos($assignment_name, 'preceptor') !== false ){
 				array_push($proctor_assignments, array($assignment['name'] => $assignment['id']));
 			}
 		}
 		$html .= '<div class="proctor-grades"><div class="empty-cell assignment-title assignment-cell"></div>';
 		foreach ($proctor_assignments as $key => $assignment) {
-			$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $group_members[0]['group']) . '">' . key($assignment) . '</a></div>';
+			$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $group_members[0]['etherpad_group_id']) . '">' . key($assignment) . '</a></div>';
 		}
 		foreach ($group_members as $key => $member) {
 			if (isset($group_members[$key-1]['group'])){
@@ -210,7 +210,7 @@ function ipe_proctor_view(){
 			if ($member['group'] !=  $check && $key != 0 ){
 				$html .= '<div class="cover"> <h2>'. $member['group'] .'</h2></div><div class="empty-cell assignment-title assignment-cell"></div>';
 				foreach ($proctor_assignments as $key => $assignment) {
-					$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $member['group']) . '">' . key($assignment) . '</a></div>';
+					$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $member['etherpad_group_id']) . '">' . key($assignment) . '</a></div>';
 				}
 			}
 			$html .= '<div class="proctor-assignment-cell proctor-student-name">'. key($member) . '</div>';
@@ -218,18 +218,18 @@ function ipe_proctor_view(){
 			foreach ($proctor_assignments as $key => $assignment) {
 				$assignment_id = $assignment[key($assignment)];
 				$score = return_assignment_score($user_id, $assignment_id);
-				$comment = return_assignment_comment($user_id, $assignment_id);     
+				$comment = return_assignment_comment($user_id, $assignment_id);
 				$html .= '<div class="proctor-assignment assignment-cell">' . selected_proctor_score($score, $user_id, $assignment_id, $comment) . '</div>';
 			}
 		}
 	//grades are in wp_usermeta at patters like ld_gb_manual_grades_785_1 (785 being the gradebook) and 1 being the item
-	//print("<pre>".print_r($proctor_assignments,true)."</pre>");	
-	//print("<pre>".print_r($group_members,true)."</pre>");	
+	//print("<pre>".print_r($proctor_assignments,true)."</pre>");
+	//print("<pre>".print_r($group_members,true)."</pre>");
 	return $html;
 	} else {
 		return 'Please login.';
 	}
-	
+
 }
 add_shortcode( 'proctor', 'ipe_proctor_view' );
 
@@ -247,9 +247,9 @@ function return_assignment_comment($user_id, $assignment_id){
 	}
 }
 
-function etherpad_assignment_link($assignment_name,$group_id){
+function etherpad_assignment_link($assignment_name,$etherpad_group_id){
 	$name = substr($assignment_name, 0,6);
-	return 'archives/etherpad/'.sanitize_title($name).'?group='.$group_id;
+	return 'archives/etherpad/'.sanitize_title($name).'?group='.$etherpad_group_id;
 }
 
 
@@ -261,18 +261,19 @@ function alt_ipe_get_group_members_leader(){
 	$all_users = [];
 	foreach($user as $key => $value){//cycle through metadata looking for learndash partial match
 	  $i = substr($key,0,24);
-	 
-	  if("learndash_group_leaders_" == substr($key,0,24)){ //such a mess to do partial match	   		
-	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field	
+
+	  if("learndash_group_leaders_" == substr($key,0,24)){ //such a mess to do partial match
+	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
 	   		$group_id =  $value[0];
-	   		//print("<pre>".print_r(alt_ipd_users_for_proctor_view($users),true)."</pre>");	
+	   		//print("<pre>".print_r(alt_ipd_users_for_proctor_view($users),true)."</pre>");
 	   		foreach ($users as $key => $student) {
-				$name =  $student->display_name;
-				array_push($all_users, array($name =>$student->ID, 'group'=>$group_id));
+        $name =  $student->display_name;
+        $etherpad_group_id = get_user_meta($student->ID, 'etherpad_group_id', true);
+				array_push($all_users, array($name =>$student->ID, 'group'=>$group_id, 'etherpad_group_id' => $etherpad_group_id));
 			}
 		  }
-		}	
-		//print("<pre>".print_r($all_users,true)."</pre>");	
+		}
+		//print("<pre>".print_r($all_users,true)."</pre>");
 	 return $all_users;//get user ids with matching groups
 	}
 
@@ -288,9 +289,9 @@ function alt_ipe_get_group_members_leader(){
 
 function selected_proctor_score($score, $user_id, $assignment_id, $assignment_comment){
 	$scores = array('unscored'=>'unscored',
-			'0 - unsatisfactory' => 50, 
-			'1 - needs improvement' => 75, 
-			'2 - satisfactory' => 85, 
+			'0 - unsatisfactory' => 50,
+			'1 - needs improvement' => 75,
+			'2 - satisfactory' => 85,
 			'3 - excellent' => 100);
 	$html = '<select id="unique-'.$user_id. $assignment_id .'" name="proctor-grade" data-user="'.$user_id.'" data-assignment="'.$assignment_id.'" data-comment="'.$assignment_comment.'">' ;
 		foreach ($scores as $key => $value) {
@@ -318,7 +319,7 @@ function update_proctor_grades(){
 	$db_score = array();
 	array_push($db_score, array('score'=>$score, 'name'=>$comment, 'status'=>'', 'component'=>1));
 	$serialized = $db_score; //it appears that it's serializing it without me
-		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) { 
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 	 	 update_user_meta($user_id, 'ld_gb_manual_grades_785_' . $assignment_id, $serialized);
 	 	}
 	 	die();
@@ -332,7 +333,7 @@ function update_proctor_grades(){
 //THE HOOK THAT RUNS AFTER QUIZ COMPLETION
 add_action("learndash_quiz_completed", function($data) {
 //Called when quiz is completed
-	
+
 	$user_id = get_current_user_id();//get user
 	$quiz_id = $data['pro_quizid'];//get quiz
 	$id = $data['quiz']->ID;//og post id to get acf data - this differs from the quiz id
@@ -344,7 +345,7 @@ add_action("learndash_quiz_completed", function($data) {
 		if(get_acf_curve_data($id, $user_discipline)){
 			$curve = get_acf_curve_data($id, $user_discipline);//get curve value
 			update_quiz_score($user_id, $quiz_id, $curve);	//update records
-			$refer = wp_get_referer();//MAYBE DO THIS FOR REDIRECT LATER . . . . . 
+			$refer = wp_get_referer();//MAYBE DO THIS FOR REDIRECT LATER . . . . .
 			//REMOVE FOR PRODUCTION
 			$quiz_id = 'quiz id = '.  $data['pro_quizid'];
 				// $content = ' disc- ' . $user_discipline . ' curve- ' . $curve . "<pre>".print_r($data['quiz']->ID,true)."</pre>";
@@ -353,30 +354,30 @@ add_action("learndash_quiz_completed", function($data) {
 			 //    'post_title'    => 'disc = ' . get_user_discipline($user_id),
 			 //    'post_content'  => $content,
 			 //    'post_status'   => 'publish',
-			 //    'post_author'   => 1,    
+			 //    'post_author'   => 1,
 				// );
-				 
+
 				// // Insert the post into the database.
 				// wp_insert_post( $my_post );
 		//END REMOVE
 			wp_redirect( $refer ); //redirect to page
 			exit;
 		}
-	} else if (group_quiz_test($id) === TRUE){		
+	} else if (group_quiz_test($id) === TRUE){
 		// $content = "<pre>".print_r($data,true)."</pre>";
 		// 	$my_post = array(
 		//     'post_title'    => 'group test- ' . group_quiz_test($id) ,
 		//     'post_content'  => $content,
 		//     'post_status'   => 'publish',
-		//     'post_author'   => 1,    
+		//     'post_author'   => 1,
 		// 	);
-			 
+
 		// 	// Insert the post into the database.
 		// 	wp_insert_post( $my_post );
 
 			assign_group_scores( $data, $quiz_id, $user_id);
 	}
-	
+
 }, 5, 1);
 
 
@@ -386,17 +387,17 @@ add_action("learndash_quiz_completed", function($data) {
 function get_acf_curve_data($post_id, $user_discipline){
 	// check if the repeater field has rows of data
 	//$count = count(get_field('field_5ced7856feaa7', $post_id));
-	if( have_rows('curve_details', $post_id) ):		
+	if( have_rows('curve_details', $post_id) ):
 	 	// loop through the rows of data
 	    while ( have_rows('curve_details', $post_id) ) : the_row();
 
 	    	$discipline = get_sub_field('discipline_group');
 	        $curve_value = get_sub_field('curve_value');
-	      	
+
 	    	if ($user_discipline === $discipline){	       //|| $user_discipline == 'All'
 	    	    //var_dump($curve_value);
 	    		return $curve_value;
-	    	} 
+	    	}
 	    	// else {
 	    	// 	return 0;
 	    	// }
@@ -413,7 +414,7 @@ function get_acf_curve_data($post_id, $user_discipline){
 
 }
 
-//get user discipline 
+//get user discipline
 function get_user_discipline($user_id){
 	$discipline = get_user_meta($user_id, '_discipline', true);
 	return $discipline;
@@ -437,18 +438,18 @@ function average_quiz_points($points, $total_points){
 //update quiz score in usermeta with curve score
 function update_quiz_score($user_id, $quiz_id, $curve){
 	$all_quizzes = get_user_quiz_data($user_id);
-	//print("<pre>".print_r($all_quizzes,true)."</pre>"); 
+	//print("<pre>".print_r($all_quizzes,true)."</pre>");
 	foreach ($all_quizzes as &$quiz) {
 
 		if ((int)$quiz['pro_quizid'] === (int)$quiz_id){ // && !array_key_exists("curved",$quiz)
-			
+
 			$quiz['curved'] = $curve;//add metafield that lets you know how much it was curved by
         	$quiz['og_points'] =  (int)$quiz['points']; //original score
 			$quiz['points'] = (int)$quiz['points'] + (int)$curve;//new score with curve added
 			$quiz['percentage'] = average_quiz_points($quiz['points']*100, $quiz['total_points']);
         	update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes);
 		}
-		
+
 	}
 }
 
@@ -456,15 +457,15 @@ function update_quiz_score($user_id, $quiz_id, $curve){
 function return_curved_quiz($user_id, $quiz_id){
 	$all_quizzes = get_user_quiz_data($user_id);
 
-		foreach ($all_quizzes as $quiz) {		
+		foreach ($all_quizzes as $quiz) {
 			if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
 				$new_score = $quiz['points'];
 			if($quiz['curved']){
-				$curve = $quiz['curved'];	
+				$curve = $quiz['curved'];
 			} else {
 				$curve = 0;
 			}
-			
+
 		}
 
 	}
@@ -472,10 +473,10 @@ function return_curved_quiz($user_id, $quiz_id){
 }
 
 
-//show curve score 
+//show curve score
 function return_score_percentage($user_id, $quiz_id){
 	$all_quizzes = get_user_quiz_data($user_id);
-	foreach ($all_quizzes as $quiz) {	
+	foreach ($all_quizzes as $quiz) {
 			if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
 				$new_score = $quiz['percentage'];
 				$pretty_percent = number_format( $new_score + .5, 0 ) . '%';
@@ -484,8 +485,8 @@ function return_score_percentage($user_id, $quiz_id){
 	}
 
 }
-//GROUP QUIZ 
-function group_quiz_test($post_id){	
+//GROUP QUIZ
+function group_quiz_test($post_id){
 	$all_categories = get_the_category($post_id);
 	$group = $all_categories[0]->slug;
 	if ($group === 'group') {
@@ -503,19 +504,19 @@ function assign_group_scores($data, $quiz_id, $user_id){
 		$all_quizzes = get_user_quiz_data($user_id);//get the submitter quiz data
 		foreach ($all_quizzes as &$quiz) {
 				if ((int)$quiz['pro_quizid'] === (int)$quiz_id){  //match found for source to copy to other users
-		  
+
 				$quiz['group_score'] = 'scored as group';//flag as scored by group process
-				
+
 				$new_group_score = $quiz;
 
-				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); 
-				}			
-			} 	
+				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes);
+				}
+			}
 		}
-	//apply to other people in the group	
+	//apply to other people in the group
 	$clean_user_ids = not_me($user_ids, $user_id);//remove quiz taker from this loop
-	foreach ($clean_user_ids as $group_user_id){	
-	   $other_users_quizzes = get_user_quiz_data($group_user_id);	
+	foreach ($clean_user_ids as $group_user_id){
+	   $other_users_quizzes = get_user_quiz_data($group_user_id);
        array_push($other_users_quizzes, $new_group_score);
        update_user_meta( $group_user_id, '_sfwd-quizzes', $all_quizzes);
 	}
