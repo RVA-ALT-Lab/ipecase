@@ -38,29 +38,40 @@
 //TESTING - remove for production
 //echo "<pre>".print_r($taken_quiz,true)."</pre>";
 
-echo "<pre>".print_r($quiz_settings,true)."</pre>";
 //quiz settings has course, lesson, quiz_pro as pro_quizid
 
 
-// echo 'quiz id = ' .$quiz_id.'<br/>';
-// echo 'post id = ' .$post->ID.'<br/>';
+ echo 'quiz id = ' .$quiz_id.'<br/>';
+ echo 'post id = ' .$post->ID.'<br/>';
+ echo 'user id = ' .get_current_user_id().'<br/>';
+
 //same
 
+$date = new DateTime();
+$date = $date->format("y:m:d h:i:s");
+write_log( $date . ' ' . __LINE__ );
 //END TESTING now!!!!!
 
 $group_members = alt_ipe_get_group_members();
 $user_ids = implode(', ', $group_members);
+var_dump($user_ids);
 $quiz_category = get_the_category($post->ID)[0]->name;//gets quiz category assuming there's only one -- not sure this is needed if we have acf fields
 
 
-echo 'group test = ' . group_quiz_test($post->ID);
+echo 'group test = ' . var_dump(group_quiz_test($post->ID));
 
 $user_discipline = get_user_discipline($user_id);
 $the_quizzes = get_user_quiz_data($user_id);
 
 
-$curve = get_acf_curve_data($post->ID, $user_discipline);
-//var_dump((int)$curve);
+ $curve = get_acf_curve_data($post->ID, $user_discipline);
+ echo 'curve is set to ' . $curve;
+// echo 'set curve: ' . $curve;
+echo '<br>attempts left: ' . $attempts_left;
+echo '<br>attempts count: ' . $attempts_count;
+// echo '<br>graded curve: '.return_curved_quiz($user_id, $quiz_id);
+// //var_dump(alt_ipe_get_group_members_leader($user_id)); //plenty returned
+
 
 
 if ( ! empty( $lesson_progression_enabled ) ) {
@@ -106,7 +117,9 @@ if ( ! empty( $lesson_progression_enabled ) ) {
     if ( $attempts_left ) {
         echo $quiz_content;
     } else { 
-    	if(return_curved_quiz($user_id, $quiz_id) >0 ){
+    	// var_dump('userid = '. $user_id);
+    	// var_dump('quiz_id = ' . $quiz_id);
+    	if(return_curved_quiz($user_id, $quiz_id) && (int)return_curved_quiz($user_id, $quiz_id) > 0 ){
 	    	echo '<h2>Your quiz was curved by ' . return_curved_quiz($user_id, $quiz_id) . ' points. Your total score is ' . return_score_percentage($user_id, $quiz_id);  
 	    }
     	echo '<h2>Group Data</h2>';

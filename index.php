@@ -255,8 +255,8 @@ function etherpad_assignment_link($assignment_name,$etherpad_group_id){
 
 //GET GRP ID FROM LEARN DASH GROUPS which is in the metadata for the logged in user
 function alt_ipe_get_group_members_leader(){
-	global $user;
-	$user_id = get_current_user_id();//get logged in user
+	//global $user;
+	$user_id =  get_current_user_id();//get logged in user
 	$user = get_user_meta($user_id);	//get user ID
 	$all_users = [];
 	foreach($user as $key => $value){//cycle through metadata looking for learndash partial match
@@ -333,6 +333,7 @@ function update_proctor_grades(){
 //THE HOOK THAT RUNS AFTER QUIZ COMPLETION
 add_action("learndash_quiz_completed", function($data) {
 //Called when quiz is completed
+	write_log($data);
 
 	$user_id = get_current_user_id();//get user
 	$quiz_id = $data['pro_quizid'];//get quiz
@@ -341,29 +342,27 @@ add_action("learndash_quiz_completed", function($data) {
 	$all_quizzes = get_user_quiz_data($user_id);//get all quizzes
 	$user_ids = alt_ipe_get_group_members();
 
-	if (group_quiz_test($id) === FALSE){
 		if(get_acf_curve_data($id, $user_discipline)){
 			$curve = get_acf_curve_data($id, $user_discipline);//get curve value
 			update_quiz_score($user_id, $quiz_id, $curve);	//update records
 			$refer = wp_get_referer();//MAYBE DO THIS FOR REDIRECT LATER . . . . .
 			//REMOVE FOR PRODUCTION
-			$quiz_id = 'quiz id = '.  $data['pro_quizid'];
-				// $content = ' disc- ' . $user_discipline . ' curve- ' . $curve . "<pre>".print_r($data['quiz']->ID,true)."</pre>";
-				// $content = "<pre>".print_r($data,true)."</pre>";
-				// $my_post = array(
-			 //    'post_title'    => 'disc = ' . get_user_discipline($user_id),
-			 //    'post_content'  => $content,
-			 //    'post_status'   => 'publish',
-			 //    'post_author'   => 1,
-				// );
+			// $quiz_id = 'quiz id = '.  $data['pro_quizid'];
+			// 	$content = ' quiz post id - ' . $id . '<br> disc- ' . $user_discipline . ' curve- ' . $curve . "<pre>".print_r($data['quiz']->ID,true)."</pre>";
+			// 	$my_post = array(
+			//     'post_title'    => 'disc = ' . get_user_discipline($user_id),
+			//     'post_content'  => $content,
+			//     'post_status'   => 'publish',
+			//     'post_author'   => 1,
+			// 	);
 
-				// // Insert the post into the database.
-				// wp_insert_post( $my_post );
+				// Insert the post into the database.
+				wp_insert_post( $my_post );
 		//END REMOVE
 			wp_redirect( $refer ); //redirect to page
 			exit;
 		}
-	} else if (group_quiz_test($id) === TRUE){
+	 if (group_quiz_test($id) === TRUE){
 		// $content = "<pre>".print_r($data,true)."</pre>";
 		// 	$my_post = array(
 		//     'post_title'    => 'group test- ' . group_quiz_test($id) ,
@@ -386,25 +385,25 @@ add_action("learndash_quiz_completed", function($data) {
 //get CURVE AMOUNT
 function get_acf_curve_data($post_id, $user_discipline){
 	// check if the repeater field has rows of data
-	//$count = count(get_field('field_5ced7856feaa7', $post_id));
-	if( have_rows('curve_details', $post_id) ):
+	//$count = count(get_field('field_5ced7856feaa7', $post_id)); 
+	if( have_rows('field_5ced7856feaa7', $post_id) ):
 	 	// loop through the rows of data
-	    while ( have_rows('curve_details', $post_id) ) : the_row();
+	 	write_log('count of curve values ' .  count(get_field('field_5ced7856feaa7', $post_id)));
+	    while ( have_rows('field_5ced7856feaa7', $post_id) ) : the_row();
 
-	    	$discipline = get_sub_field('discipline_group');
-	        $curve_value = get_sub_field('curve_value');
-
-	    	if ($user_discipline === $discipline){	       //|| $user_discipline == 'All'
+	    	$discipline = get_sub_field('field_5ced7865feaa8');
+	        $curve_value = get_sub_field('field_5ced78cdfeaa9');
+	        write_log('acf disc=' . $discipline);
+	        write_log('disc=' . $user_discipline);
+	        write_log('post id=' . $post_id);	        
+	    	if ($user_discipline == $discipline){	       //|| $user_discipline == 'All'
 	    	    //var_dump($curve_value);
-	    		return $curve_value;
-	    	}
-	    	// else {
-	    	// 	return 0;
-	    	// }
+	    		$curve = $curve_value;
+	    	}	    	
 
 
 	    endwhile;
-
+	    return $curve;
 	else :
 
 	    // no rows found
@@ -456,11 +455,13 @@ function update_quiz_score($user_id, $quiz_id, $curve){
 //to show quiz curve
 function return_curved_quiz($user_id, $quiz_id){
 	$all_quizzes = get_user_quiz_data($user_id);
-
+	//print("<pre>".print_r($all_quizzes,true)."</pre>");
+    $curve = 0;
 		foreach ($all_quizzes as $quiz) {
-			if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
-				$new_score = $quiz['points'];
+			if ((int)$quiz['quiz'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
+				$new_score = $quiz['points'];			
 			if($quiz['curved']){
+				$quiz['curved'];//what is this?
 				$curve = $quiz['curved'];
 			} else {
 				$curve = 0;
@@ -477,7 +478,7 @@ function return_curved_quiz($user_id, $quiz_id){
 function return_score_percentage($user_id, $quiz_id){
 	$all_quizzes = get_user_quiz_data($user_id);
 	foreach ($all_quizzes as $quiz) {
-			if ((int)$quiz['pro_quizid'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
+			if ((int)$quiz['quiz'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
 				$new_score = $quiz['percentage'];
 				$pretty_percent = number_format( $new_score + .5, 0 ) . '%';
 				return $pretty_percent;
@@ -503,7 +504,7 @@ function assign_group_scores($data, $quiz_id, $user_id){
 	if(get_user_quiz_data($user_id)){//has quiz data
 		$all_quizzes = get_user_quiz_data($user_id);//get the submitter quiz data
 		foreach ($all_quizzes as &$quiz) {
-				if ((int)$quiz['pro_quizid'] === (int)$quiz_id){  //match found for source to copy to other users
+				if ((int)$quiz['quiz'] === (int)$quiz_id){  //match found for source to copy to other users
 
 				$quiz['group_score'] = 'scored as group';//flag as scored by group process
 
@@ -528,4 +529,17 @@ function not_me($user_ids, $user_id){
     }
     return $user_ids;
 
+}
+//LOGGIN FROM https://www.elegantthemes.com/blog/tips-tricks/using-the-wordpress-debug-log
+
+
+
+if ( ! function_exists('write_log')) {
+   function write_log ( $log )  {
+      if ( is_array( $log ) || is_object( $log ) ) {
+         error_log( print_r( $log, true ) );
+      } else {
+         error_log( $log );
+      }
+   }
 }
