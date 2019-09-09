@@ -41,34 +41,34 @@
 //quiz settings has course, lesson, quiz_pro as pro_quizid
 
 
- echo 'quiz id = ' .$quiz_id.'<br/>';
- echo 'post id = ' .$post->ID.'<br/>';
- echo 'user id = ' .get_current_user_id().'<br/>';
-
+//  echo 'quiz id = ' .$quiz_id.'<br/>';
+//  echo 'post id = ' .$post->ID.'<br/>';
+//  echo 'user id = ' .get_current_user_id().'<br/>';
+// var_dump($quiz);
 //same
 
 $date = new DateTime();
 $date = $date->format("y:m:d h:i:s");
-write_log( $date . ' ' . __LINE__ );
+//write_log( $date . ' ' . __LINE__ );
 //END TESTING now!!!!!
 
 $group_members = alt_ipe_get_group_members();
 $user_ids = implode(', ', $group_members);
-var_dump($user_ids);
+//var_dump($user_ids);
 $quiz_category = get_the_category($post->ID)[0]->name;//gets quiz category assuming there's only one -- not sure this is needed if we have acf fields
 
 
-echo 'group test = ' . var_dump(group_quiz_test($post->ID));
+//echo 'group test = ' . var_dump(group_quiz_test($post->ID));
 
 $user_discipline = get_user_discipline($user_id);
 $the_quizzes = get_user_quiz_data($user_id);
 
 
  $curve = get_acf_curve_data($post->ID, $user_discipline);
- echo 'curve is set to ' . $curve;
-// echo 'set curve: ' . $curve;
-echo '<br>attempts left: ' . $attempts_left;
-echo '<br>attempts count: ' . $attempts_count;
+//  echo 'curve is set to ' . $curve;
+// // echo 'set curve: ' . $curve;
+// echo '<br>attempts left: ' . $attempts_left;
+// echo '<br>attempts count: ' . $attempts_count;
 // echo '<br>graded curve: '.return_curved_quiz($user_id, $quiz_id);
 // //var_dump(alt_ipe_get_group_members_leader($user_id)); //plenty returned
 
@@ -124,7 +124,9 @@ if ( ! empty( $lesson_progression_enabled ) ) {
 	    }
     	echo '<h2>Group Data</h2>';
     	echo '<p>This shows how your group has done in aggregate.</p>';
-    	$data = alt_ipd_join_stats_tables_join($user_ids, $quiz_id);
+    	$quiz_data = get_post_meta($post->ID, '_sfwd-quiz', true);
+    	$pro_quizid = $quiz_data['sfwd-quiz_quiz_pro'];
+    	$data = alt_ipd_join_stats_tables_join($user_ids, $pro_quizid);    	
         $a = doing_math($data); 	
         echo group_responses_printer($a);
         

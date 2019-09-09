@@ -357,22 +357,22 @@ add_action("learndash_quiz_completed", function($data) {
 			// 	);
 
 				// Insert the post into the database.
-				wp_insert_post( $my_post );
+				//wp_insert_post( $my_post );
 		//END REMOVE
 			wp_redirect( $refer ); //redirect to page
 			exit;
 		}
 	 if (group_quiz_test($id) === TRUE){
-		// $content = "<pre>".print_r($data,true)."</pre>";
-		// 	$my_post = array(
-		//     'post_title'    => 'group test- ' . group_quiz_test($id) ,
-		//     'post_content'  => $content,
-		//     'post_status'   => 'publish',
-		//     'post_author'   => 1,
-		// 	);
+		//$content = "<pre>".print_r($data,true)."</pre>";
+			// $my_post = array(
+		 //    'post_title'    => 'group test- ' . group_quiz_test($id) . 'quiz id - ' . $quiz_id ,
+		 //    'post_content'  => "<pre>".print_r($data,true)."</pre>",
+		 //    'post_status'   => 'publish',
+		 //    'post_author'   => 1,
+			// );
 
-		// 	// Insert the post into the database.
-		// 	wp_insert_post( $my_post );
+			// // Insert the post into the database.
+			// wp_insert_post( $my_post );
 
 			assign_group_scores( $data, $quiz_id, $user_id);
 	}
@@ -543,3 +543,23 @@ if ( ! function_exists('write_log')) {
       }
    }
 }
+
+
+//group member shortcode
+function alt_ipe_get_group_members_short(){
+	$user_id = get_current_user_id();//get logged in user
+	$user = get_user_meta($user_id,'');	//get user ID
+	$html = '';
+	foreach($user as $key=>$value){//cycle through metadata looking for learndash partial match
+	  if("learndash_group_users_" == substr($key,0,22)){ //such a mess to do partial match
+	   		$users = alt_ipd_get_group_users($value[0]);//get other users who have this metadata field
+		  }
+		}
+	//print("<pre>".print_r($users,true)."</pre>");
+	foreach ($users as $user){
+			$html .= $user->data->display_name . ' (' . get_user_discipline($user->data->ID) . ')<br>';
+		}
+	return $html;
+	 }
+
+add_shortcode( 'ipe-members', 'alt_ipe_get_group_members_short' );
