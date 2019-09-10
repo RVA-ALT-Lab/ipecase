@@ -197,7 +197,7 @@ function ipe_proctor_view(){
 				array_push($proctor_assignments, array($assignment['name'] => $assignment['id']));
 			}
 		}
-		$html .= '<div class="proctor-grades"><div class="empty-cell assignment-title assignment-cell"></div>';
+		$html .= '<div class="proctor-grades"><div class="cover"> <h2>'. get_the_title($member['group']) .'</h2></div><div class="empty-cell assignment-title assignment-cell"></div>';
 		foreach ($proctor_assignments as $key => $assignment) {
 			$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $group_members[0]['etherpad_group_id']) . '">' . key($assignment) . '</a></div>';
 		}
@@ -207,8 +207,8 @@ function ipe_proctor_view(){
 			} else {
 				$check = 'foo';
 			}
-			if ($member['group'] !=  $check && $key != 0 ){
-				$html .= '<div class="cover"> <h2>'. $member['group'] .'</h2></div><div class="empty-cell assignment-title assignment-cell"></div>';
+			if ($member['group'] !=  $check && $key != 0 ){				
+				$html .= '<div class="cover"> <h2>'. get_the_title($member['group']) .'</h2></div><div class="empty-cell assignment-title assignment-cell"></div>';
 				foreach ($proctor_assignments as $key => $assignment) {
 					$html .= '<div class="column assignment-title"><a href="' . etherpad_assignment_link(key($assignment), $member['etherpad_group_id']) . '">' . key($assignment) . '</a></div>';
 				}
