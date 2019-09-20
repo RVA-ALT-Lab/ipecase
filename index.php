@@ -374,7 +374,7 @@ add_action("learndash_quiz_completed", function($data) {
 			// // Insert the post into the database.
 			// wp_insert_post( $my_post );
 
-			assign_group_scores( $data, $quiz_id, $user_id);
+			assign_group_scores( $data, $id, $user_id); //IS THIS THE RIGHT ID PASSED?????????
 	}
 
 }, 5, 1);
@@ -508,18 +508,18 @@ function assign_group_scores($data, $quiz_id, $user_id){
 
 				$quiz['group_score'] = 'scored as group';//flag as scored by group process
 
-				$new_group_score = $quiz;
+				$new_group_score = $quiz;//should build the string of values for just this one quiz
 
-				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes);
+				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); //update for just this user
 				}
 			}
 		}
 	//apply to other people in the group
 	$clean_user_ids = not_me($user_ids, $user_id);//remove quiz taker from this loop
 	foreach ($clean_user_ids as $group_user_id){
-	   $other_users_quizzes = get_user_quiz_data($group_user_id);
-       array_push($other_users_quizzes, $new_group_score);
-       update_user_meta( $group_user_id, '_sfwd-quizzes', $all_quizzes);
+	   $other_users_quizzes = get_user_quiz_data($group_user_id);//get the group member quiz data
+       array_push($other_users_quizzes, $new_group_score);//add just this quiz information
+       update_user_meta( $group_user_id, '_sfwd-quizzes', $all_quizzes);//update
 	}
 }
 
@@ -557,7 +557,10 @@ function alt_ipe_get_group_members_short(){
 		}
 	//print("<pre>".print_r($users,true)."</pre>");
 	foreach ($users as $user){
-			$html .= $user->data->display_name . ' (' . get_user_discipline($user->data->ID) . ')<br>';
+		     //var_dump(get_user_meta($user->ID, '_eID', true));
+			 $e_id = ' <' . get_user_meta($user->ID, '_eID', true) . '> ';
+			
+			$html .= $user->data->display_name . ' (' . get_user_discipline($user->data->ID) . ') ' . $e_id . '<br>';
 		}
 	return $html;
 	 }
