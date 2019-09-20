@@ -374,7 +374,7 @@ add_action("learndash_quiz_completed", function($data) {
 			// // Insert the post into the database.
 			// wp_insert_post( $my_post );
 
-			assign_group_scores( $data, $id, $user_id); //IS THIS THE RIGHT QUIZ ID PASSED as $id ?????????
+			assign_group_scores( $data, $quiz_id, $user_id); //IS THIS THE RIGHT QUIZ ID PASSED as $quiz_id ?????????
 	}
 
 }, 5, 1);
@@ -504,11 +504,11 @@ function assign_group_scores($data, $quiz_id, $user_id){
 	if(get_user_quiz_data($user_id)){//has quiz data
 		$all_quizzes = get_user_quiz_data($user_id);//get the submitter quiz data
 		foreach ($all_quizzes as &$quiz) {
-				if ((int)$quiz['quiz'] === (int)$quiz_id){  //match found for source to copy to other users
+				if ((int)$quiz['quiz'] === (int)$quiz_id){  //match found group quiz id for source to copy to other users
 
-				$quiz['group_score'] = 'scored as group';//flag as scored by group process
+				$quiz['group_score'] = 'scored as group';//flag as scored by group process so it easier to know what happened
 
-				$new_group_score = $quiz;//should build the string of values for just this one quiz
+				$new_group_score = $quiz;//should build the values for just this one quiz
 
 				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); //update for just this user
 				}
