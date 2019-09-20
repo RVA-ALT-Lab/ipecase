@@ -506,11 +506,11 @@ function assign_group_scores($data, $quiz_id, $user_id){
 		foreach ($all_quizzes as &$quiz) {
 				if ((int)$quiz['quiz'] === (int)$quiz_id){  //match found group quiz id for source to copy to other users
 
-				$quiz['group_score'] = 'scored as group';//flag as scored by group process so it easier to know what happened
+					$quiz['group_score'] = 'scored as group';//flag as scored by group process so it easier to know what happened
 
-				$new_group_score = $quiz;//should build the values for just this one quiz
+					$new_group_score = $quiz;//should build the values for just this one quiz
 
-				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); //update for just this user
+					update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); //update for just this user
 				}
 			}
 		}
