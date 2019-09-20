@@ -374,7 +374,7 @@ add_action("learndash_quiz_completed", function($data) {
 			// // Insert the post into the database.
 			// wp_insert_post( $my_post );
 
-			assign_group_scores( $data, $id, $user_id); //IS THIS THE RIGHT ID PASSED?????????
+			assign_group_scores( $data, $id, $user_id); //IS THIS THE RIGHT QUIZ ID PASSED as $id ?????????
 	}
 
 }, 5, 1);
