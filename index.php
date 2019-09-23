@@ -333,7 +333,7 @@ function update_proctor_grades(){
 //THE HOOK THAT RUNS AFTER QUIZ COMPLETION
 add_action("learndash_quiz_completed", function($data) {
 //Called when quiz is completed
-	write_log($data);
+	//write_log($data);
 
 	$user_id = get_current_user_id();//get user
 	$quiz_id = $data['pro_quizid'];//get quiz
@@ -363,16 +363,16 @@ add_action("learndash_quiz_completed", function($data) {
 			exit;
 		}
 	 if (group_quiz_test($id) === TRUE){
-		//$content = "<pre>".print_r($data,true)."</pre>";
-			// $my_post = array(
-		 //    'post_title'    => 'group test- ' . group_quiz_test($id) . 'quiz id - ' . $quiz_id ,
-		 //    'post_content'  => "<pre>".print_r($data,true)."</pre>",
-		 //    'post_status'   => 'publish',
-		 //    'post_author'   => 1,
-			// );
+		$content = "<pre>".print_r($data,true)."</pre>";
+			$my_post = array(
+		    'post_title'    => 'group test id- ' . group_quiz_test($id) . 'quiz id - ' . $quiz_id ,
+		    'post_content'  => "<pre>".print_r($data,true)."</pre>",
+		    'post_status'   => 'publish',
+		    'post_author'   => 1,
+			);
 
-			// // Insert the post into the database.
-			// wp_insert_post( $my_post );
+			// Insert the post into the database.
+			wp_insert_post( $my_post );
 
 			assign_group_scores( $data, $id, $user_id); //IS THIS THE RIGHT ID PASSED?????????
 	}
@@ -388,14 +388,14 @@ function get_acf_curve_data($post_id, $user_discipline){
 	//$count = count(get_field('field_5ced7856feaa7', $post_id)); 
 	if( have_rows('field_5ced7856feaa7', $post_id) ):
 	 	// loop through the rows of data
-	 	write_log('count of curve values ' .  count(get_field('field_5ced7856feaa7', $post_id)));
+	 	//write_log('count of curve values ' .  count(get_field('field_5ced7856feaa7', $post_id)));
 	    while ( have_rows('field_5ced7856feaa7', $post_id) ) : the_row();
 
 	    	$discipline = get_sub_field('field_5ced7865feaa8');
 	        $curve_value = get_sub_field('field_5ced78cdfeaa9');
-	        write_log('acf disc=' . $discipline);
-	        write_log('disc=' . $user_discipline);
-	        write_log('post id=' . $post_id);	        
+	       // write_log('acf disc=' . $discipline);
+	       // write_log('disc=' . $user_discipline);
+	        //write_log('post id=' . $post_id);	        
 	    	if ($user_discipline == $discipline){	       //|| $user_discipline == 'All'
 	    	    //var_dump($curve_value);
 	    		$curve = $curve_value;
@@ -503,23 +503,29 @@ function assign_group_scores($data, $quiz_id, $user_id){
 	$user_ids = alt_ipe_get_group_members();
 	if(get_user_quiz_data($user_id)){//has quiz data
 		$all_quizzes = get_user_quiz_data($user_id);//get the submitter quiz data
+		//write_log(__LINE__);
+		//write_log(var_dump($all_quizzes));
 		foreach ($all_quizzes as &$quiz) {
+			write_log(__LINE__);
+			write_log("quiz_id = {$quiz_id}");
+			//write_log(var_dump($quiz));
 				if ((int)$quiz['quiz'] === (int)$quiz_id){  //match found for source to copy to other users
+					$quiz['group_score'] = 'scored as group';//flag as scored by group process
 
-				$quiz['group_score'] = 'scored as group';//flag as scored by group process
-
-				$new_group_score = $quiz;//should build the string of values for just this one quiz
-
-				update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); //update for just this user
+					$new_group_score = $quiz;//should build the string of values for just this one quiz
+					//write_log(__LINE__);
+					//write_log($new_group_score);
+					update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); //update for just this user
 				}
 			}
 		}
+		
 	//apply to other people in the group
 	$clean_user_ids = not_me($user_ids, $user_id);//remove quiz taker from this loop
 	foreach ($clean_user_ids as $group_user_id){
 	   $other_users_quizzes = get_user_quiz_data($group_user_id);//get the group member quiz data
        array_push($other_users_quizzes, $new_group_score);//add just this quiz information
-       update_user_meta( $group_user_id, '_sfwd-quizzes', $all_quizzes);//update
+       update_user_meta( $group_user_id, '_sfwd-quizzes', $other_users_quizzes);//update -- stupid mistake goes here
 	}
 }
 
