@@ -99,6 +99,7 @@ function alt_ipd_join_stats_tables_join($user_ids, $quiz_id){
 	$quiz_id = (int)$quiz_id;
 	global $wpdb;
 	$results = $wpdb->get_results( "SELECT wp_wp_pro_quiz_statistic_ref.statistic_ref_id, wp_wp_pro_quiz_statistic_ref.quiz_id, wp_wp_pro_quiz_statistic_ref.user_id, wp_wp_pro_quiz_statistic.statistic_ref_id, wp_wp_pro_quiz_statistic.answer_data AS answer_choice, wp_wp_pro_quiz_statistic.question_id, wp_wp_pro_quiz_statistic.correct_count, wp_wp_pro_quiz_question.title, wp_wp_pro_quiz_question.question, wp_wp_pro_quiz_question.answer_data FROM wp_wp_pro_quiz_statistic_ref INNER JOIN wp_wp_pro_quiz_statistic ON wp_wp_pro_quiz_statistic_ref.statistic_ref_id = wp_wp_pro_quiz_statistic.statistic_ref_id JOIN wp_wp_pro_quiz_question ON wp_wp_pro_quiz_question.id = wp_wp_pro_quiz_statistic.question_id WHERE (wp_wp_pro_quiz_statistic_ref.quiz_id =" . $quiz_id . " AND wp_wp_pro_quiz_statistic_ref.user_id IN (" . $user_ids . ")) ORDER BY question_id ASC");
+	//var_dump($results);
 	return $results;
 }
 
@@ -460,7 +461,8 @@ function return_curved_quiz($user_id, $quiz_id){
 		foreach ($all_quizzes as $quiz) {
 			if ((int)$quiz['quiz'] === (int)$quiz_id ){ // && !array_key_exists("curved",$quiz)
 				$new_score = $quiz['points'];			
-			if($quiz['curved']){
+				
+			if(array_key_exists("curved", $quiz)){
 				$quiz['curved'];//what is this?
 				$curve = $quiz['curved'];
 			} else {
@@ -513,8 +515,8 @@ function assign_group_scores($data, $quiz_id, $user_id){
 					$quiz['group_score'] = 'scored as group';//flag as scored by group process
 
 					$new_group_score = $quiz;//should build the string of values for just this one quiz
-					//write_log(__LINE__);
-					//write_log($new_group_score);
+					write_log(__LINE__);
+					write_log($new_group_score);
 					update_user_meta( $user_id, '_sfwd-quizzes', $all_quizzes); //update for just this user
 				}
 			}
@@ -523,6 +525,9 @@ function assign_group_scores($data, $quiz_id, $user_id){
 	//apply to other people in the group
 	$clean_user_ids = not_me($user_ids, $user_id);//remove quiz taker from this loop
 	foreach ($clean_user_ids as $group_user_id){
+		write_log(__LINE__);
+		write_log("group score");
+		write_log(implode(",",$new_group_score));
 	   $other_users_quizzes = get_user_quiz_data($group_user_id);//get the group member quiz data
        array_push($other_users_quizzes, $new_group_score);//add just this quiz information
        update_user_meta( $group_user_id, '_sfwd-quizzes', $other_users_quizzes);//update -- stupid mistake goes here
@@ -562,11 +567,46 @@ function alt_ipe_get_group_members_short(){
 		  }
 		}
 	//print("<pre>".print_r($users,true)."</pre>");
-	foreach ($users as $user){
-			
-			$html .= $user->data->display_name . ' (' . get_user_discipline($user->data->ID) . ') &lt;' . get_user_meta($user->ID, '_eID', true) . '&gt; <br>';
-		}
+	if ($users){
+		foreach ($users as $user){
+				
+				$html .= $user->data->display_name . ' (' . get_user_discipline($user->data->ID) . ') &lt;<a href="mailto:' . get_user_meta($user->ID, '_eID', true) . '@mymail.vcu.edu">' . get_user_meta($user->ID, '_eID', true) . '@mymail.vcu.edu</a>&gt; <br>';
+			}
+	}
 	return $html;
 	 }
 
 add_shortcode( 'ipe-members', 'alt_ipe_get_group_members_short' );
+
+
+
+//Gravity forms form chooser replacement shortcode 
+function ipe_gform_by_discipline($atts){
+  $a = shortcode_atts( array(
+    'md' => '',
+    'ph' => '',
+    'nr' => '',
+  ), $atts );
+
+  $user_id = get_current_user_id();
+  $key = '_discipline';
+  $single = true;
+  $user_discipline = get_user_meta( $user_id, $key, $single );
+  
+  add_filter( 'gform_submit_button', '__return_false' );//removes submission button
+ 
+ if ($user_discipline == 'MD' || current_user_can('administrator') || $user_discipline == 'Proctor'  ) {
+  echo do_shortcode('[gravityform id="' . $a['md'] . '" title=false description=true]');
+}
+
+if ($user_discipline == 'PH' || current_user_can('administrator') || $user_discipline == 'Proctor' ) {
+    echo do_shortcode('[gravityform id="' . $a['ph'] . '" title=false description=true]');
+}
+if ($user_discipline == 'NR' || current_user_can('administrator') || $user_discipline == 'Proctor' ) {
+    echo do_shortcode('[gravityform id="' . $a['nr'] . '" title=false description=true]');
+  }
+
+}
+
+add_shortcode( 'form-discipline', 'ipe_gform_by_discipline' );
+
